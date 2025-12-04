@@ -24,6 +24,26 @@ spec:
       storage: true
       subresources:
         status: {}
+      additionalPrinterColumns:
+        - name: Cluster
+          type: string
+          jsonPath: .spec.argus.clusterName
+          description: LogicMonitor cluster name
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+          description: Deployment phase
+        - name: Collectors
+          type: integer
+          jsonPath: .status.collectorCount
+          description: Number of collectors
+        - name: Argus
+          type: boolean
+          jsonPath: .status.argusReady
+          description: Argus ready status
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
       schema:
         openAPIV3Schema:
           description: LMContainer deploys LogicMonitor container monitoring to a Kubernetes cluster.
