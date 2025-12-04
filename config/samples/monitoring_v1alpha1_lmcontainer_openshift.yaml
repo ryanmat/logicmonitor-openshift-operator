@@ -1,0 +1,60 @@
+# Description: LMContainer configuration optimized for OpenShift clusters.
+# Description: Includes OpenShift-specific settings and SCC considerations.
+apiVersion: monitoring.logicmonitor.com/v1alpha1
+kind: LMContainer
+metadata:
+  name: lm-monitoring-openshift
+  namespace: logicmonitor
+  labels:
+    app.kubernetes.io/name: lmcontainer
+    app.kubernetes.io/instance: lm-monitoring-openshift
+    app.kubernetes.io/part-of: logicmonitor-operator
+  annotations:
+    # OpenShift-specific annotations
+    openshift.io/description: "LogicMonitor container monitoring for OpenShift"
+spec:
+  global:
+    # Use Secret-based credentials
+    userDefinedSecret: "lm-credentials"
+
+  argus:
+    enabled: true
+    clusterName: "openshift-prod"
+    clusterTreeParentID: 1
+    loglevel: "info"
+    deleteDevices: true
+
+  collector:
+    replicas: 2
+    size: "medium"
+
+  collectorset-controller:
+    enabled: true
+
+  # KSM configuration for OpenShift
+  # The lm-container chart includes OpenShift SCC for KSM
+  kube-state-metrics:
+    enabled: true
+    replicas: 1
+    # OpenShift already provides some metrics via built-in monitoring
+    # Adjust collectors based on your needs
+    collectors:
+      - daemonsets
+      - replicasets
+      - statefulsets
+      - persistentvolumes
+      - persistentvolumeclaims
+      - endpoints
+      - cronjobs
+      - jobs
+      - pods
+      - nodes
+      - deployments
+      - services
+      - poddisruptionbudgets
+
+  lm-logs:
+    enabled: false
+
+  lmotel:
+    enabled: false

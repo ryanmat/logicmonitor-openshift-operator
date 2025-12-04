@@ -1,0 +1,143 @@
+# Description: Full LMContainer configuration with all available options.
+# Description: Use as a reference for all configurable fields.
+apiVersion: monitoring.logicmonitor.com/v1alpha1
+kind: LMContainer
+metadata:
+  name: lm-monitoring-full
+  namespace: logicmonitor
+  labels:
+    app.kubernetes.io/name: lmcontainer
+    app.kubernetes.io/instance: lm-monitoring-full
+    app.kubernetes.io/part-of: logicmonitor-operator
+    environment: production
+spec:
+  # ---------------------------------------------------------------------------
+  # GLOBAL CONFIGURATION
+  # ---------------------------------------------------------------------------
+  global:
+    # Credentials via Secret reference (recommended)
+    userDefinedSecret: "lm-credentials"
+
+    # OR inline credentials (not recommended for production)
+    # account: "mycompany"
+    # accessID: "your-access-id"
+    # accessKey: "your-access-key"
+
+    # LogicMonitor domain
+    # Leave empty for standard logicmonitor.com
+    # Use "lmgov.us" for government cloud
+    companyDomain: ""
+
+    # Global image overrides
+    image:
+      registry: ""
+      pullPolicy: "Always"
+
+  # ---------------------------------------------------------------------------
+  # ARGUS - Kubernetes Resource Discovery
+  # ---------------------------------------------------------------------------
+  argus:
+    enabled: true
+
+    # Unique cluster identifier in LogicMonitor
+    clusterName: "prod-openshift-east"
+
+    # Parent resource group ID (must exist in LogicMonitor)
+    clusterTreeParentID: 1
+
+    # Resource container group ID
+    resourceContainerID: 1
+
+    # Logging level: debug, info, warn, error
+    loglevel: "info"
+
+    # Delete devices when resources are removed
+    deleteDevices: true
+
+    # Disable alerting for cluster resources
+    disableAlerting: false
+
+    # Resource filtering (regex patterns)
+    # filters:
+    #   pods: ""
+    #   services: ""
+    #   nodes: ""
+    #   deployments: ""
+
+  # ---------------------------------------------------------------------------
+  # COLLECTOR CONFIGURATION
+  # ---------------------------------------------------------------------------
+  collector:
+    # Number of collector replicas (1-10)
+    replicas: 2
+
+    # Collector size: nano, small, medium, large
+    size: "medium"
+
+    # Use Early Access collector version
+    useEA: false
+
+    # Collector group ID (auto-created if 0)
+    groupID: 0
+
+    # Alert escalation chain ID
+    escalationChainID: 0
+
+    # Resource requests and limits
+    # resources:
+    #   requests:
+    #     cpu: "1000m"
+    #     memory: "2Gi"
+    #   limits:
+    #     cpu: "2000m"
+    #     memory: "4Gi"
+
+  # ---------------------------------------------------------------------------
+  # COLLECTORSET CONTROLLER
+  # ---------------------------------------------------------------------------
+  collectorset-controller:
+    enabled: true
+
+  # ---------------------------------------------------------------------------
+  # KUBE-STATE-METRICS
+  # ---------------------------------------------------------------------------
+  kube-state-metrics:
+    enabled: true
+    replicas: 1
+    selfMonitor:
+      enabled: true
+      telemetryPort: 8081
+    collectors:
+      - daemonsets
+      - replicasets
+      - statefulsets
+      - persistentvolumes
+      - persistentvolumeclaims
+      - endpoints
+      - cronjobs
+      - jobs
+      - pods
+      - nodes
+      - deployments
+      - services
+      - poddisruptionbudgets
+
+  # ---------------------------------------------------------------------------
+  # LM-LOGS - Log Forwarding (Optional)
+  # ---------------------------------------------------------------------------
+  lm-logs:
+    enabled: false
+    # When enabled, configure log collection:
+    # lm-logs:
+    #   enabled: true
+    #   config:
+    #     kubernetes_logs: true
+
+  # ---------------------------------------------------------------------------
+  # LMOTEL - OpenTelemetry Integration (Optional)
+  # ---------------------------------------------------------------------------
+  lmotel:
+    enabled: false
+    # When enabled, configure OpenTelemetry:
+    # lmotel:
+    #   enabled: true

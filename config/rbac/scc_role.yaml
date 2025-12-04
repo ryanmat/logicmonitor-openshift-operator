@@ -1,0 +1,18 @@
+# Description: ClusterRole granting use of the LogicMonitor SCC.
+# Description: Bound to service accounts that need the logicmonitor-scc.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logicmonitor-scc-user
+  labels:
+    app.kubernetes.io/name: logicmonitor-operator
+    app.kubernetes.io/part-of: logicmonitor-operator
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resources:
+      - securitycontextconstraints
+    resourceNames:
+      - logicmonitor-scc
+    verbs:
+      - use

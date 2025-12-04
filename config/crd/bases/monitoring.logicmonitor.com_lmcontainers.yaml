@@ -1,0 +1,292 @@
+# Description: CRD for LMContainer custom resource with OpenAPI validation.
+# Description: Defines schema for LogicMonitor container monitoring deployment.
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: lmcontainers.monitoring.logicmonitor.com
+  labels:
+    app.kubernetes.io/name: logicmonitor-operator
+    app.kubernetes.io/part-of: logicmonitor-operator
+spec:
+  group: monitoring.logicmonitor.com
+  names:
+    kind: LMContainer
+    listKind: LMContainerList
+    plural: lmcontainers
+    singular: lmcontainer
+    shortNames:
+      - lmc
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Cluster
+          type: string
+          jsonPath: .spec.argus.clusterName
+          description: LogicMonitor cluster name
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+          description: Deployment phase
+        - name: Collectors
+          type: integer
+          jsonPath: .status.collectorCount
+          description: Number of collectors
+        - name: Argus
+          type: boolean
+          jsonPath: .status.argusReady
+          description: Argus ready status
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: LMContainer deploys LogicMonitor container monitoring to a Kubernetes cluster.
+          type: object
+          properties:
+            apiVersion:
+              description: APIVersion defines the versioned schema of this representation of an object.
+              type: string
+            kind:
+              description: Kind is a string value representing the REST resource this object represents.
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: Spec defines the desired state of LMContainer deployment.
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+              properties:
+                global:
+                  description: Global configuration shared across all components.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    account:
+                      description: |
+                        LogicMonitor account name. This is the subdomain from your portal URL.
+                        Example: If your URL is "acme.logicmonitor.com", use "acme".
+                        Ignored if userDefinedSecret is set.
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+                    accessID:
+                      description: |
+                        LogicMonitor API access ID. Generate from Settings > Users and Roles > API Tokens.
+                        Ignored if userDefinedSecret is set.
+                      type: string
+                    accessKey:
+                      description: |
+                        LogicMonitor API access key.
+                        Ignored if userDefinedSecret is set.
+                      type: string
+                    userDefinedSecret:
+                      description: |
+                        Name of a Secret containing LogicMonitor credentials.
+                        The Secret must contain keys: accessID, accessKey, account.
+                        When set, inline credential fields are ignored.
+                      type: string
+                    companyDomain:
+                      description: |
+                        LogicMonitor domain. Leave empty for standard logicmonitor.com.
+                        Use "lmgov.us" for government cloud.
+                      type: string
+                      enum:
+                        - ""
+                        - "logicmonitor.com"
+                        - "lmgov.us"
+                    image:
+                      description: Global image configuration overrides.
+                      type: object
+                      properties:
+                        registry:
+                          description: Override image registry for all components.
+                          type: string
+                        pullPolicy:
+                          description: Override image pull policy for all components.
+                          type: string
+                          enum:
+                            - ""
+                            - "Always"
+                            - "IfNotPresent"
+                            - "Never"
+                argus:
+                  description: Argus configuration for Kubernetes resource discovery.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable Argus deployment.
+                      type: boolean
+                      default: true
+                    clusterName:
+                      description: |
+                        Unique name for this cluster in LogicMonitor.
+                        Appears as "Kubernetes Cluster: <clusterName>" in the portal.
+                        WARNING: Do not change after initial deployment.
+                      type: string
+                      minLength: 1
+                      maxLength: 63
+                      pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+                    clusterTreeParentID:
+                      description: |
+                        Parent resource group ID in LogicMonitor where the cluster tree is created.
+                        The resource group must exist before deployment.
+                      type: integer
+                      minimum: 1
+                      default: 1
+                    resourceContainerID:
+                      description: Resource container group ID in LogicMonitor.
+                      type: integer
+                      minimum: 1
+                collectorset-controller:
+                  description: Collectorset Controller configuration for collector pod management.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable Collectorset Controller deployment.
+                      type: boolean
+                      default: true
+                collector:
+                  description: Collector configuration.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    replicas:
+                      description: Number of collector pod replicas.
+                      type: integer
+                      minimum: 1
+                      maximum: 10
+                      default: 1
+                    size:
+                      description: Collector size determining resource allocation.
+                      type: string
+                      enum:
+                        - "nano"
+                        - "small"
+                        - "medium"
+                        - "large"
+                      default: "small"
+                    useEA:
+                      description: Use Early Access collector version.
+                      type: boolean
+                      default: false
+                    groupID:
+                      description: Collector group ID in LogicMonitor. Auto-created if not specified.
+                      type: integer
+                      minimum: 0
+                    escalationChainID:
+                      description: Alert escalation chain ID for collector alerts.
+                      type: integer
+                      minimum: 0
+                kube-state-metrics:
+                  description: Kube State Metrics configuration.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable Kube State Metrics deployment.
+                      type: boolean
+                      default: true
+                    replicas:
+                      description: Number of KSM pod replicas.
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                      default: 1
+                lm-logs:
+                  description: LM Logs configuration for log forwarding.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable LM Logs deployment.
+                      type: boolean
+                      default: false
+                lmotel:
+                  description: LMOTEL configuration for OpenTelemetry integration.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable LMOTEL deployment.
+                      type: boolean
+                      default: false
+            status:
+              description: Status defines the observed state of LMContainer.
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+              properties:
+                phase:
+                  description: Current phase of the LMContainer deployment.
+                  type: string
+                  enum:
+                    - "Pending"
+                    - "Installing"
+                    - "Running"
+                    - "Failed"
+                    - "Updating"
+                    - "Deleting"
+                conditions:
+                  description: Conditions represent the latest available observations of the LMContainer state.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - status
+                    properties:
+                      type:
+                        description: Type of condition.
+                        type: string
+                      status:
+                        description: Status of the condition (True, False, Unknown).
+                        type: string
+                        enum:
+                          - "True"
+                          - "False"
+                          - "Unknown"
+                      reason:
+                        description: Machine-readable reason for the condition.
+                        type: string
+                      message:
+                        description: Human-readable message for the condition.
+                        type: string
+                      lastTransitionTime:
+                        description: Last time the condition transitioned.
+                        type: string
+                        format: date-time
+                helmReleaseName:
+                  description: Name of the managed Helm release.
+                  type: string
+                helmReleaseStatus:
+                  description: Status of the Helm release.
+                  type: string
+                observedGeneration:
+                  description: Last observed generation of the LMContainer resource.
+                  type: integer
+                  format: int64
+                collectorCount:
+                  description: Number of running collector pods.
+                  type: integer
+                  minimum: 0
+                argusReady:
+                  description: Whether Argus is ready and registered with LogicMonitor.
+                  type: boolean
+                collectorsetControllerReady:
+                  description: Whether Collectorset Controller is ready.
+                  type: boolean
+                lastReconcileTime:
+                  description: Last successful reconciliation time.
+                  type: string
+                  format: date-time
+                message:
+                  description: Human-readable status message.
+                  type: string

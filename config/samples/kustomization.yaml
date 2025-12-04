@@ -1,0 +1,8 @@
+## Append samples of your project ##
+resources:
+- monitoring_v1alpha1_lmcontainer.yaml
+- monitoring_v1alpha1_lmcontainer_minimal.yaml
+- monitoring_v1alpha1_lmcontainer_full.yaml
+- monitoring_v1alpha1_lmcontainer_openshift.yaml
+- secret_lm-credentials.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

@@ -1,0 +1,236 @@
+# Description: ClusterRole for the LogicMonitor operator manager.
+# Description: Defines permissions needed to manage LMContainer resources and Helm releases.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+  labels:
+    app.kubernetes.io/name: logicmonitor-operator
+    app.kubernetes.io/part-of: logicmonitor-operator
+rules:
+  ##
+  ## Base operator rules
+  ##
+
+  # Namespaces - read to verify existence
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+
+  ##
+  ## Rules for monitoring.logicmonitor.com/v1alpha1, Kind: LMContainer
+  ##
+  - apiGroups:
+      - monitoring.logicmonitor.com
+    resources:
+      - lmcontainers
+      - lmcontainers/status
+      - lmcontainers/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## Core API resources - needed by Helm chart components
+  ##
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/log
+      - services
+      - services/finalizers
+      - endpoints
+      - persistentvolumeclaims
+      - events
+      - configmaps
+      - secrets
+      - serviceaccounts
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## Apps API resources - deployments, statefulsets for components
+  ##
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - daemonsets
+      - replicasets
+      - statefulsets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## Batch API resources - jobs for collector setup
+  ##
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## RBAC API resources - needed to create roles for components
+  ##
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+      - rolebindings
+      - clusterroles
+      - clusterrolebindings
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - bind
+      - escalate
+
+  ##
+  ## Networking API resources
+  ##
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - networkpolicies
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## Policy API resources
+  ##
+  - apiGroups:
+      - policy
+    resources:
+      - poddisruptionbudgets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## Coordination API resources - leader election
+  ##
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## OpenShift-specific resources
+  ##
+  - apiGroups:
+      - security.openshift.io
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+      - use
+
+  ##
+  ## Monitoring resources - for Prometheus integration
+  ##
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+      - podmonitors
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## Discovery API - for kube-state-metrics
+  ##
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - get
+      - list
+      - watch
+
+  ##
+  ## Autoscaling API
+  ##
+  - apiGroups:
+      - autoscaling
+    resources:
+      - horizontalpodautoscalers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  # +kubebuilder:scaffold:rules
