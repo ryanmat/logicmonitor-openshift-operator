@@ -1,0 +1,45 @@
+apiVersion: monitoring.logicmonitor.com/v1alpha1
+kind: LMContainer
+metadata:
+  name: lmcontainer-sample
+spec:
+  # Default values copied from <project_dir>/helm-charts/lm-container/values.yaml
+  argus:
+    enabled: true
+  collectorset-controller:
+    enabled: true
+  global:
+    collectorsetServiceNameSuffix: lm-container-collectorset-controller
+    companyDomain: ""
+    image:
+      pullPolicy: ""
+      registry: ""
+    kube-state-metrics:
+      enabled: true
+    userDefinedSecret: ""
+  kube-state-metrics:
+    collectors:
+    - daemonsets
+    - replicasets
+    - statefulsets
+    - persistentvolumes
+    - persistentvolumeclaims
+    - endpoints
+    - cronjobs
+    - jobs
+    - pods
+    - nodes
+    - deployments
+    - services
+    - poddisruptionbudgets
+    enabled: true
+    replicas: 1
+    selfMonitor:
+      enabled: true
+      telemetryPort: 8081
+  lm-logs:
+    enabled: false
+  lmotel:
+    enabled: false
+  
+  
