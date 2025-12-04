@@ -229,3 +229,15 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+##@ Validation
+
+.PHONY: validate-credentials
+validate-credentials: ## Validate LogicMonitor credentials Secret exists and has required keys.
+ifndef NAMESPACE
+	$(error NAMESPACE is required. Usage: make validate-credentials NAMESPACE=logicmonitor SECRET_NAME=lm-credentials)
+endif
+ifndef SECRET_NAME
+	$(error SECRET_NAME is required. Usage: make validate-credentials NAMESPACE=logicmonitor SECRET_NAME=lm-credentials)
+endif
+	./scripts/validate-secret.sh $(NAMESPACE) $(SECRET_NAME)
