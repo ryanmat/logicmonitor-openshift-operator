@@ -25,4 +25,8 @@ resources:
 - lmcontainer_admin_role.yaml
 - lmcontainer_editor_role.yaml
 - lmcontainer_viewer_role.yaml
+# OpenShift SecurityContextConstraints usage role
+# Comment out if not deploying to OpenShift
+- scc_role.yaml
+- scc_rolebinding.yaml
 
