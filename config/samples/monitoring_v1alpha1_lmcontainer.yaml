@@ -1,45 +1,103 @@
+# Description: Sample LMContainer custom resource for LogicMonitor container monitoring.
+# Description: Update required fields before applying to your cluster.
 apiVersion: monitoring.logicmonitor.com/v1alpha1
 kind: LMContainer
 metadata:
   name: lmcontainer-sample
+  namespace: logicmonitor
+  labels:
+    app.kubernetes.io/name: lmcontainer
+    app.kubernetes.io/instance: lmcontainer-sample
+    app.kubernetes.io/part-of: logicmonitor-operator
 spec:
-  # Default values copied from <project_dir>/helm-charts/lm-container/values.yaml
+  # ---------------------------------------------------------------------------
+  # GLOBAL CONFIGURATION
+  # ---------------------------------------------------------------------------
+  global:
+    # REQUIRED: LogicMonitor account name (subdomain from <account>.logicmonitor.com)
+    # Example: If your portal URL is "acme.logicmonitor.com", use "acme"
+    # Ignored if userDefinedSecret is set
+    account: ""
+
+    # REQUIRED: LogicMonitor API access ID
+    # Generate from Settings > Users and Roles > API Tokens
+    # Ignored if userDefinedSecret is set
+    accessID: ""
+
+    # REQUIRED: LogicMonitor API access key
+    # Ignored if userDefinedSecret is set
+    accessKey: ""
+
+    # RECOMMENDED: Reference a Secret containing credentials instead of inline values
+    # Secret must contain keys: accessID, accessKey, account
+    # When set, the inline credential fields above are ignored
+    userDefinedSecret: ""
+
+    # LogicMonitor domain (leave empty for standard logicmonitor.com)
+    # Use "lmgov.us" for government cloud
+    companyDomain: ""
+
+    # Image configuration overrides (optional)
+    image:
+      registry: ""
+      pullPolicy: ""
+
+    # Internal service naming configuration
+    collectorsetServiceNameSuffix: "lm-container-collectorset-controller"
+
+  # ---------------------------------------------------------------------------
+  # ARGUS - Kubernetes Resource Discovery
+  # ---------------------------------------------------------------------------
   argus:
     enabled: true
+
+    # REQUIRED: Unique name for this cluster in LogicMonitor
+    # This name appears in the LogicMonitor portal as "Kubernetes Cluster: <clusterName>"
+    # WARNING: Do not change after initial deployment
+    clusterName: ""
+
+    # Parent resource group ID in LogicMonitor (default: root group)
+    # Create a static resource group in LM first, then use its ID here
+    clusterTreeParentID: 1
+
+  # ---------------------------------------------------------------------------
+  # COLLECTORSET CONTROLLER - Collector Pod Management
+  # ---------------------------------------------------------------------------
   collectorset-controller:
     enabled: true
-  global:
-    collectorsetServiceNameSuffix: lm-container-collectorset-controller
-    companyDomain: ""
-    image:
-      pullPolicy: ""
-      registry: ""
-    kube-state-metrics:
-      enabled: true
-    userDefinedSecret: ""
+
+  # ---------------------------------------------------------------------------
+  # KUBE-STATE-METRICS - Kubernetes Metrics Exporter
+  # ---------------------------------------------------------------------------
   kube-state-metrics:
-    collectors:
-    - daemonsets
-    - replicasets
-    - statefulsets
-    - persistentvolumes
-    - persistentvolumeclaims
-    - endpoints
-    - cronjobs
-    - jobs
-    - pods
-    - nodes
-    - deployments
-    - services
-    - poddisruptionbudgets
     enabled: true
     replicas: 1
     selfMonitor:
       enabled: true
       telemetryPort: 8081
+    collectors:
+      - daemonsets
+      - replicasets
+      - statefulsets
+      - persistentvolumes
+      - persistentvolumeclaims
+      - endpoints
+      - cronjobs
+      - jobs
+      - pods
+      - nodes
+      - deployments
+      - services
+      - poddisruptionbudgets
+
+  # ---------------------------------------------------------------------------
+  # LM-LOGS - Log Forwarding (Optional)
+  # ---------------------------------------------------------------------------
   lm-logs:
     enabled: false
+
+  # ---------------------------------------------------------------------------
+  # LMOTEL - OpenTelemetry Integration (Optional)
+  # ---------------------------------------------------------------------------
   lmotel:
     enabled: false
-  
-  
