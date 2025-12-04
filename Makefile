@@ -177,9 +177,17 @@ endif
 
 .PHONY: bundle
 bundle: kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
+	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
+	./scripts/patch-bundle-csv.sh
+	$(OPERATOR_SDK) bundle validate ./bundle
+
+.PHONY: bundle-regenerate
+bundle-regenerate: kustomize operator-sdk ## Regenerate kustomize manifests and bundle (overwrites base CSV).
 	$(OPERATOR_SDK) generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
+	./scripts/patch-bundle-csv.sh
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 .PHONY: bundle-build

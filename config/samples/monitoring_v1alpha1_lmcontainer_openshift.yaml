@@ -3,11 +3,11 @@
 apiVersion: monitoring.logicmonitor.com/v1alpha1
 kind: LMContainer
 metadata:
-  name: lm-monitoring
+  name: lm-monitoring-openshift
   namespace: logicmonitor
   labels:
     app.kubernetes.io/name: lmcontainer
-    app.kubernetes.io/instance: lm-monitoring
+    app.kubernetes.io/instance: lm-monitoring-openshift
     app.kubernetes.io/part-of: logicmonitor-operator
   annotations:
     # OpenShift-specific annotations

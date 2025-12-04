@@ -1,0 +1,123 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+    categories: Monitoring
+    containerImage: quay.io/logicmonitor/logicmonitor-operator:v0.1.0
+    createdAt: "2024-12-03T00:00:00Z"
+    description: Deploy LogicMonitor container monitoring on OpenShift clusters
+    operators.operatorframework.io/builder: operator-sdk-v1.42.0
+    operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
+    repository: https://github.com/logicmonitor/logicmonitor-operator
+    support: LogicMonitor
+  name: logicmonitor-operator.v0.1.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: LMContainer deploys LogicMonitor container monitoring to a Kubernetes
+        cluster.
+      displayName: LMContainer
+      kind: LMContainer
+      name: lmcontainers.monitoring.logicmonitor.com
+      version: v1alpha1
+  description: |
+    ## LogicMonitor Container Monitoring Operator
+
+    The LogicMonitor Operator provides a native OpenShift experience for deploying
+    and managing LogicMonitor's container monitoring solution.
+
+    ### Features
+
+    - **Automatic Discovery**: Automatically discovers and monitors pods, nodes,
+      services, deployments, and other Kubernetes resources
+    - **Pre-configured Alerting**: Ships with pre-configured alert thresholds
+      based on best practices
+    - **Long-term Data Retention**: 2-year data retention for capacity planning
+      and trend analysis
+    - **Unified Monitoring**: Integrates with existing LogicMonitor infrastructure
+      monitoring for end-to-end visibility
+
+    ### Components Deployed
+
+    - **Argus**: Kubernetes resource discovery and monitoring agent
+    - **Collectorset Controller**: Manages LogicMonitor collector pod lifecycle
+    - **Kube State Metrics**: Exports Kubernetes object metrics
+
+    ### Prerequisites
+
+    - LogicMonitor account with Container Monitoring license
+    - API credentials with appropriate permissions
+    - OpenShift 4.12 or later
+
+    ### Getting Started
+
+    1. Create a Secret with your LogicMonitor credentials:
+       ```
+       oc create secret generic lm-credentials \
+         --namespace logicmonitor \
+         --from-literal=account=YOUR_ACCOUNT \
+         --from-literal=accessID=YOUR_ACCESS_ID \
+         --from-literal=accessKey=YOUR_ACCESS_KEY
+       ```
+
+    2. Create an LMContainer resource:
+       ```yaml
+       apiVersion: monitoring.logicmonitor.com/v1alpha1
+       kind: LMContainer
+       metadata:
+         name: lm-monitoring
+         namespace: logicmonitor
+       spec:
+         global:
+           userDefinedSecret: "lm-credentials"
+         argus:
+           clusterName: "my-openshift-cluster"
+       ```
+
+    ### Documentation
+
+    For detailed documentation, visit:
+    https://www.logicmonitor.com/support/lm-container
+  displayName: LogicMonitor Container Monitoring
+  icon:
+  - base64data: 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
+    mediatype: image/jpeg
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - monitoring
+  - observability
+  - kubernetes
+  - openshift
+  - logicmonitor
+  - metrics
+  - apm
+  links:
+  - name: Documentation
+    url: https://www.logicmonitor.com/support/lm-container
+  - name: LogicMonitor
+    url: https://www.logicmonitor.com
+  maintainers:
+  - email: support@logicmonitor.com
+    name: LogicMonitor
+  maturity: alpha
+  minKubeVersion: 1.23.0
+  provider:
+    name: LogicMonitor
+    url: https://www.logicmonitor.com
+  version: 0.1.0

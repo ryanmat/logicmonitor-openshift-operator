@@ -3,7 +3,7 @@
 apiVersion: monitoring.logicmonitor.com/v1alpha1
 kind: LMContainer
 metadata:
-  name: lm-monitoring
+  name: lm-monitoring-minimal
   namespace: logicmonitor
 spec:
   global:

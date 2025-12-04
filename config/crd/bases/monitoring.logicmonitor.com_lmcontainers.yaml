@@ -145,23 +145,6 @@ spec:
                       description: Resource container group ID in LogicMonitor.
                       type: integer
                       minimum: 1
-                    loglevel:
-                      description: Log level for Argus.
-                      type: string
-                      enum:
-                        - "debug"
-                        - "info"
-                        - "warn"
-                        - "error"
-                      default: "info"
-                    deleteDevices:
-                      description: Delete devices from LogicMonitor when resources are removed from the cluster.
-                      type: boolean
-                      default: true
-                    disableAlerting:
-                      description: Disable alerting for all cluster resources.
-                      type: boolean
-                      default: false
                 collectorset-controller:
                   description: Collectorset Controller configuration for collector pod management.
                   type: object
