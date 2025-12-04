@@ -13,8 +13,6 @@ The LogicMonitor OpenShift Operator automates the deployment and lifecycle manag
 
 ## Architecture
 
-- Artifact Hub for LogicMonitor Helm Charts: https://artifacthub.io/packages/search?repo=logicmonitor-helm-charts&sort=relevance&page=1
-
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     OpenShift Cluster                        │
@@ -61,6 +59,8 @@ The LogicMonitor OpenShift Operator automates the deployment and lifecycle manag
 - `oc` CLI configured with cluster-admin access
 
 ## Installation
+
+- Artifact Hub for LogicMonitor Helm Charts: https://artifacthub.io/packages/search?repo=logicmonitor-helm-charts&sort=relevance&page=1
 
 ### Option 1: OperatorHub (OLM)
 
