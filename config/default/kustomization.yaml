@@ -18,6 +18,9 @@ resources:
 - ../crd
 - ../rbac
 - ../manager
+# [OPENSHIFT] Uncomment to include OpenShift SecurityContextConstraints.
+# Required for OpenShift deployments.
+#- ../openshift
 # [PROMETHEUS] To enable prometheus monitor, uncomment all sections with 'PROMETHEUS'.
 #- ../prometheus
 # [METRICS] Expose the controller manager metrics service.

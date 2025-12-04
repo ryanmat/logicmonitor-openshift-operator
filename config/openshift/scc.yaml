@@ -1,0 +1,61 @@
+# Description: SecurityContextConstraints for LogicMonitor components on OpenShift.
+# Description: Allows Argus, Collectorset Controller, and Collector pods to run.
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: logicmonitor-scc
+  labels:
+    app.kubernetes.io/name: logicmonitor-operator
+    app.kubernetes.io/part-of: logicmonitor-operator
+  annotations:
+    kubernetes.io/description: |
+      SecurityContextConstraints for LogicMonitor monitoring components.
+      Allows pods to run with specific capabilities required for monitoring.
+
+# Pod security settings
+allowPrivilegedContainer: false
+allowPrivilegeEscalation: false
+allowHostNetwork: false
+allowHostPorts: false
+allowHostPID: false
+allowHostIPC: false
+allowHostDirVolumePlugin: false
+
+# Required capabilities - drop all, add only what's needed
+requiredDropCapabilities:
+  - ALL
+defaultAddCapabilities: []
+allowedCapabilities: []
+
+# Run as settings
+runAsUser:
+  type: MustRunAsNonRoot
+seLinuxContext:
+  type: MustRunAs
+fsGroup:
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+
+# Read-only root filesystem (components may need write access)
+readOnlyRootFilesystem: false
+
+# Allowed volume types
+volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
+
+# No seccomp profile restriction
+seccompProfiles:
+  - runtime/default
+
+# Service accounts that can use this SCC
+# These will be dynamically added based on the release name
+users: []
+
+# Priority - higher than restricted but lower than privileged
+priority: 10
