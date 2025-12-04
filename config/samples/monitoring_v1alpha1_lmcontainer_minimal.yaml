@@ -1,0 +1,14 @@
+# Description: Minimal LMContainer configuration using Secret-based credentials.
+# Description: Use this as a starting point for production deployments.
+apiVersion: monitoring.logicmonitor.com/v1alpha1
+kind: LMContainer
+metadata:
+  name: lm-monitoring
+  namespace: logicmonitor
+spec:
+  global:
+    # Reference to Secret containing accessID, accessKey, account
+    userDefinedSecret: "lm-credentials"
+  argus:
+    # REQUIRED: Unique cluster name in LogicMonitor
+    clusterName: "my-cluster"
