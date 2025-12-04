@@ -1,8 +1,13 @@
+# Description: CRD for LMContainer custom resource with OpenAPI validation.
+# Description: Defines schema for LogicMonitor container monitoring deployment.
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: lmcontainers.monitoring.logicmonitor.com
+  labels:
+    app.kubernetes.io/name: logicmonitor-operator
+    app.kubernetes.io/part-of: logicmonitor-operator
 spec:
   group: monitoring.logicmonitor.com
   names:
@@ -10,35 +15,208 @@ spec:
     listKind: LMContainerList
     plural: lmcontainers
     singular: lmcontainer
+    shortNames:
+      - lmc
   scope: Namespaced
   versions:
-  - name: v1alpha1
-    schema:
-      openAPIV3Schema:
-        description: LMContainer is the Schema for the lmcontainers API
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: Spec defines the desired state of LMContainer
-            type: object
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            description: Status defines the observed state of LMContainer
-            type: object
-            x-kubernetes-preserve-unknown-fields: true
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      schema:
+        openAPIV3Schema:
+          description: LMContainer deploys LogicMonitor container monitoring to a Kubernetes cluster.
+          type: object
+          properties:
+            apiVersion:
+              description: APIVersion defines the versioned schema of this representation of an object.
+              type: string
+            kind:
+              description: Kind is a string value representing the REST resource this object represents.
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: Spec defines the desired state of LMContainer deployment.
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+              properties:
+                global:
+                  description: Global configuration shared across all components.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    account:
+                      description: |
+                        LogicMonitor account name. This is the subdomain from your portal URL.
+                        Example: If your URL is "acme.logicmonitor.com", use "acme".
+                        Ignored if userDefinedSecret is set.
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+                    accessID:
+                      description: |
+                        LogicMonitor API access ID. Generate from Settings > Users and Roles > API Tokens.
+                        Ignored if userDefinedSecret is set.
+                      type: string
+                    accessKey:
+                      description: |
+                        LogicMonitor API access key.
+                        Ignored if userDefinedSecret is set.
+                      type: string
+                    userDefinedSecret:
+                      description: |
+                        Name of a Secret containing LogicMonitor credentials.
+                        The Secret must contain keys: accessID, accessKey, account.
+                        When set, inline credential fields are ignored.
+                      type: string
+                    companyDomain:
+                      description: |
+                        LogicMonitor domain. Leave empty for standard logicmonitor.com.
+                        Use "lmgov.us" for government cloud.
+                      type: string
+                      enum:
+                        - ""
+                        - "logicmonitor.com"
+                        - "lmgov.us"
+                    image:
+                      description: Global image configuration overrides.
+                      type: object
+                      properties:
+                        registry:
+                          description: Override image registry for all components.
+                          type: string
+                        pullPolicy:
+                          description: Override image pull policy for all components.
+                          type: string
+                          enum:
+                            - ""
+                            - "Always"
+                            - "IfNotPresent"
+                            - "Never"
+                argus:
+                  description: Argus configuration for Kubernetes resource discovery.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable Argus deployment.
+                      type: boolean
+                      default: true
+                    clusterName:
+                      description: |
+                        Unique name for this cluster in LogicMonitor.
+                        Appears as "Kubernetes Cluster: <clusterName>" in the portal.
+                        WARNING: Do not change after initial deployment.
+                      type: string
+                      minLength: 1
+                      maxLength: 63
+                      pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+                    clusterTreeParentID:
+                      description: |
+                        Parent resource group ID in LogicMonitor where the cluster tree is created.
+                        The resource group must exist before deployment.
+                      type: integer
+                      minimum: 1
+                      default: 1
+                    resourceContainerID:
+                      description: Resource container group ID in LogicMonitor.
+                      type: integer
+                      minimum: 1
+                    loglevel:
+                      description: Log level for Argus.
+                      type: string
+                      enum:
+                        - "debug"
+                        - "info"
+                        - "warn"
+                        - "error"
+                      default: "info"
+                    deleteDevices:
+                      description: Delete devices from LogicMonitor when resources are removed from the cluster.
+                      type: boolean
+                      default: true
+                    disableAlerting:
+                      description: Disable alerting for all cluster resources.
+                      type: boolean
+                      default: false
+                collectorset-controller:
+                  description: Collectorset Controller configuration for collector pod management.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable Collectorset Controller deployment.
+                      type: boolean
+                      default: true
+                collector:
+                  description: Collector configuration.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    replicas:
+                      description: Number of collector pod replicas.
+                      type: integer
+                      minimum: 1
+                      maximum: 10
+                      default: 1
+                    size:
+                      description: Collector size determining resource allocation.
+                      type: string
+                      enum:
+                        - "nano"
+                        - "small"
+                        - "medium"
+                        - "large"
+                      default: "small"
+                    useEA:
+                      description: Use Early Access collector version.
+                      type: boolean
+                      default: false
+                    groupID:
+                      description: Collector group ID in LogicMonitor. Auto-created if not specified.
+                      type: integer
+                      minimum: 0
+                    escalationChainID:
+                      description: Alert escalation chain ID for collector alerts.
+                      type: integer
+                      minimum: 0
+                kube-state-metrics:
+                  description: Kube State Metrics configuration.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable Kube State Metrics deployment.
+                      type: boolean
+                      default: true
+                    replicas:
+                      description: Number of KSM pod replicas.
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                      default: 1
+                lm-logs:
+                  description: LM Logs configuration for log forwarding.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable LM Logs deployment.
+                      type: boolean
+                      default: false
+                lmotel:
+                  description: LMOTEL configuration for OpenTelemetry integration.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: Enable LMOTEL deployment.
+                      type: boolean
+                      default: false
+            status:
+              description: Status defines the observed state of LMContainer.
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
