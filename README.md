@@ -13,6 +13,8 @@ The LogicMonitor OpenShift Operator automates the deployment and lifecycle manag
 
 ## Architecture
 
+- Artifact Hub for LogicMonitor Helm Charts: https://artifacthub.io/packages/search?repo=logicmonitor-helm-charts&sort=relevance&page=1
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     OpenShift Cluster                        │
@@ -383,3 +385,4 @@ Apache License 2.0
 
 - Documentation: https://www.logicmonitor.com/support/lm-container
 - Issues: https://github.com/ryanmat/logicmonitor-openshift-operator/issues
+- Artifact Hub: https://artifacthub.io/packages/search?repo=logicmonitor-helm-charts&sort=relevance&page=1
