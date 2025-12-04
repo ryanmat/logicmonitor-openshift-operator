@@ -60,7 +60,7 @@ The LogicMonitor OpenShift Operator automates the deployment and lifecycle manag
 
 ## Installation
 
-- Artifact Hub for LogicMonitor Helm Charts: https://artifacthub.io/packages/search?repo=logicmonitor-helm-charts&sort=relevance&page=1
+Artifact Hub for LogicMonitor Helm Charts: https://artifacthub.io/packages/search?repo=logicmonitor-helm-charts&sort=relevance&page=1
 
 ### Option 1: OperatorHub (OLM)
 
