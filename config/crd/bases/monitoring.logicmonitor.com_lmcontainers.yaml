@@ -220,3 +220,70 @@ spec:
               description: Status defines the observed state of LMContainer.
               type: object
               x-kubernetes-preserve-unknown-fields: true
+              properties:
+                phase:
+                  description: Current phase of the LMContainer deployment.
+                  type: string
+                  enum:
+                    - "Pending"
+                    - "Installing"
+                    - "Running"
+                    - "Failed"
+                    - "Updating"
+                    - "Deleting"
+                conditions:
+                  description: Conditions represent the latest available observations of the LMContainer state.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - status
+                    properties:
+                      type:
+                        description: Type of condition.
+                        type: string
+                      status:
+                        description: Status of the condition (True, False, Unknown).
+                        type: string
+                        enum:
+                          - "True"
+                          - "False"
+                          - "Unknown"
+                      reason:
+                        description: Machine-readable reason for the condition.
+                        type: string
+                      message:
+                        description: Human-readable message for the condition.
+                        type: string
+                      lastTransitionTime:
+                        description: Last time the condition transitioned.
+                        type: string
+                        format: date-time
+                helmReleaseName:
+                  description: Name of the managed Helm release.
+                  type: string
+                helmReleaseStatus:
+                  description: Status of the Helm release.
+                  type: string
+                observedGeneration:
+                  description: Last observed generation of the LMContainer resource.
+                  type: integer
+                  format: int64
+                collectorCount:
+                  description: Number of running collector pods.
+                  type: integer
+                  minimum: 0
+                argusReady:
+                  description: Whether Argus is ready and registered with LogicMonitor.
+                  type: boolean
+                collectorsetControllerReady:
+                  description: Whether Collectorset Controller is ready.
+                  type: boolean
+                lastReconcileTime:
+                  description: Last successful reconciliation time.
+                  type: string
+                  format: date-time
+                message:
+                  description: Human-readable status message.
+                  type: string
