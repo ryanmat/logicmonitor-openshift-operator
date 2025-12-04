@@ -1,0 +1,83 @@
+# Description: Git ignore file for Go/Operator SDK projects.
+# Description: Excludes build artifacts, IDE files, and sensitive configurations.
+
+# Go build artifacts
+bin/
+testbin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go test artifacts
+*.test
+*.out
+cover.out
+coverage.html
+
+# Go module cache (if vendoring)
+vendor/
+
+# Operator SDK artifacts
+bundle/*.yaml.bak
+config/**/*.yaml.bak
+
+# Build directories
+dist/
+build/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Claude and LLM generated files
+.claude/
+*.claude
+claude-*.md
+CLAUDE.md
+
+# LLM spec and plan files
+docs/plan.md
+docs/todo.md
+docs/operator_spec.md
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+secrets.yaml
+secrets.yml
+
+# Kubernetes local config
+kubeconfig
+.kubeconfig
+
+# Helm artifacts
+*.tgz
+charts/*.tgz
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.log
+
+# OLM testing artifacts
+catalog-source.yaml
+scorecard-output/
