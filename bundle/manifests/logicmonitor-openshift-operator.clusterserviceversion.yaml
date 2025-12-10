@@ -239,6 +239,10 @@ spec:
   description: |
     ## LogicMonitor Container Monitoring Operator
 
+    **Note**: This is a community-maintained operator. For official LogicMonitor
+    support, please contact LogicMonitor directly. Issues and contributions are
+    welcome on [GitHub](https://github.com/ryanmat/logicmonitor-openshift-operator).
+
     The LogicMonitor Operator provides a native OpenShift experience for deploying
     and managing LogicMonitor's container monitoring solution.
 
