@@ -218,7 +218,11 @@ metadata:
         }
       ]
     capabilities: Basic Install
+    categories: Monitoring
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:v0.1.0
     createdAt: "2025-12-04T02:09:06Z"
+    repository: https://github.com/ryanmat/logicmonitor-openshift-operator
+    support: LogicMonitor
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
     operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
   name: logicmonitor-openshift-operator.v0.1.0
@@ -227,7 +231,9 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - kind: LMContainer
+    - description: LMContainer deploys LogicMonitor container monitoring components including Argus, Collectorset Controller, and Kube State Metrics to monitor Kubernetes resources.
+      displayName: LM Container
+      kind: LMContainer
       name: lmcontainers.monitoring.logicmonitor.com
       version: v1alpha1
   description: |
@@ -517,7 +523,7 @@ spec:
                 - --leader-elect
                 - --leader-election-id=logicmonitor-openshift-operator
                 - --health-probe-bind-address=:8081
-                image: quay.io/logicmonitor/logicmonitor-operator:v0.1.0
+                image: ghcr.io/ryanmat/logicmonitor-openshift-operator:v0.1.0
                 livenessProbe:
                   httpGet:
                     path: /healthz
