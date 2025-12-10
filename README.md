@@ -138,6 +138,8 @@ oc apply -f lmcontainer.yaml
 | `argus.enabled` | boolean | No | Enable Argus discovery agent (default: true) |
 | `argus.clusterName` | string | Yes | Unique cluster name in LogicMonitor |
 | `argus.clusterTreeParentID` | integer | No | Parent resource group ID (default: 1) |
+| `argus.monitoringMode` | string | No | Monitoring mode: Essentials, Advanced (default: Essentials) |
+| `argus.monitoring.disable` | list | No | List of resources to exclude from monitoring |
 | `argus.collector.replicas` | integer | No | Number of collector pods (default: 1) |
 | `argus.collector.size` | string | No | Collector size: nano, small, medium, large |
 | `collectorset-controller.enabled` | boolean | No | Enable CSC (default: true) |
@@ -152,6 +154,41 @@ oc apply -f lmcontainer.yaml
 | small | 500m | 512Mi | Medium clusters (50-200 pods) |
 | medium | 1000m | 1Gi | Large clusters (200-500 pods) |
 | large | 2000m | 2Gi | Enterprise clusters (500+ pods) |
+
+### Monitoring Modes
+
+The operator supports two monitoring modes:
+
+| Mode | Description | Disabled Resources |
+|------|-------------|--------------------|
+| Essentials | Default mode, excludes ephemeral and low-value resources | resourcequotas, limitranges, roles, rolebindings, networkpolicies, configmaps, clusterrolebindings, clusterroles, priorityclasses, storageclasses, cronjobs, jobs, endpoints, ingresses, secrets, serviceaccounts, poddisruptionbudgets, customresourcedefinitions |
+| Advanced | Full monitoring including Jobs and CronJobs | None by default |
+
+To enable Jobs/CronJobs monitoring while keeping other Essentials exclusions:
+
+```yaml
+spec:
+  argus:
+    monitoringMode: "Advanced"
+    monitoring:
+      disable:
+        - resourcequotas
+        - limitranges
+        - roles
+        - rolebindings
+        - networkpolicies
+        - configmaps
+        - clusterrolebindings
+        - clusterroles
+        - priorityclasses
+        - storageclasses
+        - endpoints
+        - ingresses
+        - secrets
+        - serviceaccounts
+        - poddisruptionbudgets
+        - customresourcedefinitions
+```
 
 ### Enabling Event and Pod Logs
 
@@ -367,6 +404,13 @@ make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.1.
 | Operator Version | Helm Chart Version | OpenShift Version |
 |-----------------|-------------------|-------------------|
 | 0.1.x | lm-container 11.x | 4.12+ |
+
+## Tested Platforms
+
+| Platform | Version | Status |
+|----------|---------|--------|
+| AWS ROSA | 4.14 | Verified |
+| Azure ARO | 4.14 | Verified |
 
 ## Contributing
 
