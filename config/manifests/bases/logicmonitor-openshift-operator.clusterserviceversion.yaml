@@ -5,12 +5,12 @@ metadata:
     alm-examples: '[]'
     capabilities: Basic Install
     categories: Monitoring
-    containerImage: quay.io/logicmonitor/logicmonitor-operator:v0.1.0
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:v0.1.0
     createdAt: "2024-12-03T00:00:00Z"
     description: Deploy LogicMonitor container monitoring on OpenShift clusters
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
     operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
-    repository: https://github.com/logicmonitor/logicmonitor-operator
+    repository: https://github.com/ryanmat/logicmonitor-openshift-operator
     support: LogicMonitor
   name: logicmonitor-operator.v0.1.0
   namespace: placeholder
@@ -18,14 +18,17 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: LMContainer deploys LogicMonitor container monitoring to a Kubernetes
-        cluster.
-      displayName: LMContainer
+    - description: LMContainer deploys LogicMonitor container monitoring components including Argus, Collectorset Controller, and Kube State Metrics to monitor Kubernetes resources.
+      displayName: LM Container
       kind: LMContainer
       name: lmcontainers.monitoring.logicmonitor.com
       version: v1alpha1
   description: |
     ## LogicMonitor Container Monitoring Operator
+
+    **Note**: This is a community-maintained operator. For official LogicMonitor
+    support, please contact LogicMonitor directly. Issues and contributions are
+    welcome on [GitHub](https://github.com/ryanmat/logicmonitor-openshift-operator).
 
     The LogicMonitor Operator provides a native OpenShift experience for deploying
     and managing LogicMonitor's container monitoring solution.

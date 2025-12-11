@@ -28,7 +28,13 @@ if ! command -v yq &> /dev/null; then
 fi
 
 # Extract fields from base CSV and apply to bundle CSV
+# Patches both annotations and spec fields
 yq eval-all '
+  select(fileIndex == 0).metadata.annotations.categories = select(fileIndex == 1).metadata.annotations.categories |
+  select(fileIndex == 0).metadata.annotations.containerImage = select(fileIndex == 1).metadata.annotations.containerImage |
+  select(fileIndex == 0).metadata.annotations.repository = select(fileIndex == 1).metadata.annotations.repository |
+  select(fileIndex == 0).metadata.annotations.support = select(fileIndex == 1).metadata.annotations.support |
+  select(fileIndex == 0).spec.customresourcedefinitions = select(fileIndex == 1).spec.customresourcedefinitions |
   select(fileIndex == 0).spec.description = select(fileIndex == 1).spec.description |
   select(fileIndex == 0).spec.displayName = select(fileIndex == 1).spec.displayName |
   select(fileIndex == 0).spec.icon = select(fileIndex == 1).spec.icon |

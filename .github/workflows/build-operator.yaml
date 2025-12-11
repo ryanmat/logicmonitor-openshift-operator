@@ -252,3 +252,27 @@ jobs:
 
           echo "Operator deployed successfully!"
           kubectl get pods -n operators
+
+      - name: Debug on failure
+        if: failure()
+        run: |
+          echo "=== CSV Status ==="
+          kubectl get csv -n operators -o wide || true
+          echo ""
+          echo "=== Deployments ==="
+          kubectl get deployments -n operators -o wide || true
+          echo ""
+          echo "=== Pods ==="
+          kubectl get pods -n operators -o wide || true
+          echo ""
+          echo "=== Pod Descriptions ==="
+          kubectl describe pods -n operators || true
+          echo ""
+          echo "=== Pod Logs ==="
+          for pod in $(kubectl get pods -n operators -o jsonpath='{.items[*].metadata.name}'); do
+            echo "--- Logs for $pod ---"
+            kubectl logs $pod -n operators --all-containers=true || true
+          done
+          echo ""
+          echo "=== Events ==="
+          kubectl get events -n operators --sort-by='.lastTimestamp' || true

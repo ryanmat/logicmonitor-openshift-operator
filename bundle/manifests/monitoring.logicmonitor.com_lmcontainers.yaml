@@ -75,28 +75,10 @@ spec:
                       The resource group must exist before deployment.
                     minimum: 1
                     type: integer
-                  deleteDevices:
-                    default: true
-                    description: Delete devices from LogicMonitor when resources are
-                      removed from the cluster.
-                    type: boolean
-                  disableAlerting:
-                    default: false
-                    description: Disable alerting for all cluster resources.
-                    type: boolean
                   enabled:
                     default: true
                     description: Enable Argus deployment.
                     type: boolean
-                  loglevel:
-                    default: info
-                    description: Log level for Argus.
-                    enum:
-                    - debug
-                    - info
-                    - warn
-                    - error
-                    type: string
                   resourceContainerID:
                     description: Resource container group ID in LogicMonitor.
                     minimum: 1
