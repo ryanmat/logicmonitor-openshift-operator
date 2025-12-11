@@ -5,7 +5,7 @@ metadata:
     alm-examples: '[]'
     capabilities: Basic Install
     categories: Monitoring
-    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:v0.1.0
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.1.0
     createdAt: "2024-12-03T00:00:00Z"
     description: Deploy LogicMonitor container monitoring on OpenShift clusters
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
