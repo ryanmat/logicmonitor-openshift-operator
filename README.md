@@ -2,6 +2,16 @@
 
 A Kubernetes operator for deploying and managing LogicMonitor Container Monitoring on OpenShift clusters. This operator wraps the `lm-container` Helm chart and provides native integration with OpenShift's Operator Lifecycle Manager (OLM).
 
+## Status
+
+| Item | Status |
+|------|--------|
+| **OperatorHub Submission** | Pending Review ([PR #7270](https://github.com/k8s-operatorhub/community-operators/pull/7270)) |
+| **Current Version** | 0.1.0 |
+| **Helm Chart Version** | lm-container 11.2.0 |
+
+This is a community-maintained operator and is not officially supported by LogicMonitor.
+
 ## Overview
 
 The LogicMonitor OpenShift Operator automates the deployment and lifecycle management of the LogicMonitor Container Monitoring stack, including:
@@ -64,11 +74,13 @@ Artifact Hub for LogicMonitor Helm Charts: https://artifacthub.io/packages/searc
 
 ### Option 1: OperatorHub (OLM)
 
-Once published to OperatorHub, install via the OpenShift Console:
+The operator has been submitted to OperatorHub and is pending review. Once approved, install via the OpenShift Console:
 
 1. Navigate to Operators > OperatorHub
 2. Search for "LogicMonitor"
 3. Click Install and follow the prompts
+
+Until the OperatorHub submission is approved, use the Manual Installation method below.
 
 ### Option 2: Manual Installation
 
@@ -407,12 +419,21 @@ make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.1.
 |-----------------|-------------------|-------------------|
 | 0.1.x | lm-container 11.x | 4.12+ |
 
-## Tested Platforms
+## Supported Platforms
 
-| Platform | Version | Status |
-|----------|---------|--------|
-| AWS ROSA | 4.14 | Verified |
-| Azure ARO | 4.14 | Verified |
+This operator works on any OpenShift 4.12+ cluster. It requires the `security.openshift.io` API for SecurityContextConstraints, which is available on all OpenShift distributions.
+
+| Platform | Status |
+|----------|--------|
+| AWS ROSA | Tested |
+| Azure ARO | Tested |
+| Self-managed OpenShift (on-prem) | Compatible |
+| Self-managed OpenShift (datacenter) | Compatible |
+| OpenShift Dedicated | Compatible |
+| OpenShift on IBM Cloud | Compatible |
+| OKD (community OpenShift) | Compatible |
+
+Note: This operator does not work on vanilla Kubernetes clusters due to OpenShift-specific API requirements.
 
 ## Contributing
 
@@ -427,6 +448,10 @@ Apache License 2.0
 
 ## Support
 
-- Documentation: https://www.logicmonitor.com/support/lm-container
-- Issues: https://github.com/ryanmat/logicmonitor-openshift-operator/issues
-- Artifact Hub: https://artifacthub.io/packages/search?repo=logicmonitor-helm-charts&sort=relevance&page=1
+This is a community-maintained operator. For support:
+
+- **Operator Issues**: https://github.com/ryanmat/logicmonitor-openshift-operator/issues
+- **LogicMonitor Documentation**: https://www.logicmonitor.com/support/lm-container
+- **Helm Chart Reference**: https://artifacthub.io/packages/search?repo=logicmonitor-helm-charts
+
+For issues with the underlying lm-container Helm chart, refer to the official LogicMonitor documentation.
