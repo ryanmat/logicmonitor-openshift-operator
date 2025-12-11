@@ -53,6 +53,12 @@ docs/plan.md
 docs/todo.md
 docs/operator_spec.md
 
+# Personal development docs
+docs/docker-uv.md
+docs/python.md
+docs/using-uv.md
+docs/source-control.md
+
 # Environment and secrets
 .env
 .env.local
