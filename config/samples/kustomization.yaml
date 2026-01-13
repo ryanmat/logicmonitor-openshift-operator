@@ -4,5 +4,6 @@ resources:
 - monitoring_v1alpha1_lmcontainer_minimal.yaml
 - monitoring_v1alpha1_lmcontainer_full.yaml
 - monitoring_v1alpha1_lmcontainer_openshift.yaml
+- monitoring_v1alpha1_lmcontainer_rosa_advanced.yaml
 - secret_lm-credentials.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

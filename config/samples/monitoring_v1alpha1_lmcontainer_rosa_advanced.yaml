@@ -1,0 +1,44 @@
+# Description: ROSA cluster LMContainer with Advanced mode for Jobs/CronJobs monitoring.
+# Description: Uses Essentials exclusions minus cronjobs/jobs to enable workload monitoring.
+apiVersion: monitoring.logicmonitor.com/v1alpha1
+kind: LMContainer
+metadata:
+  name: lm-container
+  namespace: logicmonitor
+  labels:
+    app.kubernetes.io/name: lmcontainer
+    app.kubernetes.io/instance: lm-container-rosa
+    app.kubernetes.io/part-of: logicmonitor-operator
+spec:
+  global:
+    userDefinedSecret: "lm-credentials"
+  argus:
+    enabled: true
+    clusterName: "rm-rosa-cluster-operator"
+    clusterTreeParentID: 493
+    monitoringMode: "Advanced"
+    monitoring:
+      disable:
+        - resourcequotas
+        - limitranges
+        - roles
+        - rolebindings
+        - networkpolicies
+        - configmaps
+        - clusterrolebindings
+        - clusterroles
+        - priorityclasses
+        - storageclasses
+        - endpoints
+        - ingresses
+        - secrets
+        - serviceaccounts
+        - poddisruptionbudgets
+        - customresourcedefinitions
+    collector:
+      replicas: 2
+      size: "large"
+  collectorset-controller:
+    enabled: true
+  kube-state-metrics:
+    enabled: true
