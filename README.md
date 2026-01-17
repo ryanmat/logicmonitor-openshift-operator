@@ -6,11 +6,11 @@ A Kubernetes operator for deploying and managing LogicMonitor Container Monitori
 
 | Item | Status |
 |------|--------|
-| **OperatorHub Submission** | Pending Review ([PR #7270](https://github.com/k8s-operatorhub/community-operators/pull/7270)) |
+| **OperatorHub Submission** | Pending Review ([PR #8609](https://github.com/redhat-openshift-ecosystem/community-operators-prod/pull/8609)) |
 | **Current Version** | 0.1.0 |
 | **Helm Chart Version** | lm-container 11.2.0 |
 
-This is a community-maintained operator and is not officially supported by LogicMonitor.
+This is a community-maintained operator and is not officially supported by LogicMonitor. Once approved, it will appear in OperatorHub under the **Community Operators** catalog source.
 
 ## Overview
 
