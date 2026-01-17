@@ -12,7 +12,7 @@ metadata:
     operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
     repository: https://github.com/ryanmat/logicmonitor-openshift-operator
     support: LogicMonitor
-  name: logicmonitor-operator.v0.1.0
+  name: logicmonitor-openshift-operator.v0.1.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}

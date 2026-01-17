@@ -1,3 +1,5 @@
+# Description: Kustomize configuration for sample LMContainer resources.
+# Description: Includes all sample CRs and credential Secret template.
 ## Append samples of your project ##
 resources:
 - monitoring_v1alpha1_lmcontainer.yaml

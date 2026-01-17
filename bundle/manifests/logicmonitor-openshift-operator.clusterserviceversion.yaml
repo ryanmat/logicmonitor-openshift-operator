@@ -9,6 +9,60 @@ metadata:
           "kind": "LMContainer",
           "metadata": {
             "labels": {
+              "app.kubernetes.io/instance": "lm-container-rosa",
+              "app.kubernetes.io/name": "lmcontainer",
+              "app.kubernetes.io/part-of": "logicmonitor-operator"
+            },
+            "name": "lm-container",
+            "namespace": "logicmonitor"
+          },
+          "spec": {
+            "argus": {
+              "clusterName": "rm-rosa-cluster-operator",
+              "clusterTreeParentID": 493,
+              "collector": {
+                "replicas": 2,
+                "size": "large"
+              },
+              "enabled": true,
+              "monitoring": {
+                "disable": [
+                  "resourcequotas",
+                  "limitranges",
+                  "roles",
+                  "rolebindings",
+                  "networkpolicies",
+                  "configmaps",
+                  "clusterrolebindings",
+                  "clusterroles",
+                  "priorityclasses",
+                  "storageclasses",
+                  "endpoints",
+                  "ingresses",
+                  "secrets",
+                  "serviceaccounts",
+                  "poddisruptionbudgets",
+                  "customresourcedefinitions"
+                ]
+              },
+              "monitoringMode": "Advanced"
+            },
+            "collectorset-controller": {
+              "enabled": true
+            },
+            "global": {
+              "userDefinedSecret": "lm-credentials"
+            },
+            "kube-state-metrics": {
+              "enabled": true
+            }
+          }
+        },
+        {
+          "apiVersion": "monitoring.logicmonitor.com/v1alpha1",
+          "kind": "LMContainer",
+          "metadata": {
+            "labels": {
               "app.kubernetes.io/instance": "lm-monitoring-full",
               "app.kubernetes.io/name": "lmcontainer",
               "app.kubernetes.io/part-of": "logicmonitor-operator",
@@ -218,11 +272,12 @@ metadata:
         }
       ]
     capabilities: Basic Install
-    createdAt: "2025-12-11T01:14:04Z"
+    categories: Monitoring
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.1.0
+    createdAt: "2026-01-17T04:30:38Z"
+    description: Deploy LogicMonitor container monitoring on OpenShift clusters
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
     operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
-    categories: Monitoring
-    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:v0.1.0
     repository: https://github.com/ryanmat/logicmonitor-openshift-operator
     support: LogicMonitor
   name: logicmonitor-openshift-operator.v0.1.0
@@ -527,7 +582,7 @@ spec:
                       - --leader-elect
                       - --leader-election-id=logicmonitor-openshift-operator
                       - --health-probe-bind-address=:8081
-                    image: ghcr.io/ryanmat/logicmonitor-openshift-operator:v0.1.0
+                    image: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.1.0
                     livenessProbe:
                       httpGet:
                         path: /healthz
@@ -620,8 +675,8 @@ spec:
     - email: support@logicmonitor.com
       name: LogicMonitor
   maturity: alpha
+  minKubeVersion: 1.23.0
   provider:
     name: LogicMonitor
     url: https://www.logicmonitor.com
   version: 0.1.0
-  minKubeVersion: 1.23.0
