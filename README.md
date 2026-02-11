@@ -6,11 +6,11 @@ A Kubernetes operator for deploying and managing LogicMonitor Container Monitori
 
 | Item | Status |
 |------|--------|
-| **OperatorHub Submission** | Pending Review ([PR #8609](https://github.com/redhat-openshift-ecosystem/community-operators-prod/pull/8609)) |
+| **OperatorHub** | Published ([community-operators-prod](https://github.com/redhat-openshift-ecosystem/community-operators-prod)) |
 | **Current Version** | 0.1.0 |
 | **Helm Chart Version** | lm-container 11.2.0 |
 
-This is a community-maintained operator and is not officially supported by LogicMonitor. Once approved, it will appear in OperatorHub under the **Community Operators** catalog source.
+This is a community-maintained operator and is not officially supported by LogicMonitor. It is available in OperatorHub under the **Community Operators** catalog source on OpenShift 4.12+ clusters.
 
 ## Overview
 
@@ -74,13 +74,13 @@ Artifact Hub for LogicMonitor Helm Charts: https://artifacthub.io/packages/searc
 
 ### Option 1: OperatorHub (OLM)
 
-The operator has been submitted to OperatorHub and is pending review. Once approved, install via the OpenShift Console:
+Install via the OpenShift Console:
 
-1. Navigate to Operators > OperatorHub
-2. Search for "LogicMonitor"
-3. Click Install and follow the prompts
-
-Until the OperatorHub submission is approved, use the Manual Installation method below.
+1. Navigate to **Operators > OperatorHub**
+2. Search for **"LogicMonitor"**
+3. Select **LogicMonitor Container Monitoring** from the Community Operators catalog
+4. Click **Install** and follow the prompts
+5. Create the credentials Secret and LMContainer CR (see below)
 
 ### Option 2: Manual Installation
 
