@@ -113,7 +113,7 @@ spec:
       - statefulsets
       - persistentvolumes
       - persistentvolumeclaims
-      - endpoints
+      - endpointslices
       - cronjobs
       - jobs
       - pods

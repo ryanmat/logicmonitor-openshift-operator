@@ -36,7 +36,7 @@ kube-state-metrics:
     - statefulsets
     - persistentvolumes
     - persistentvolumeclaims
-    - endpoints
+    - endpointslices
     - cronjobs
     - jobs
     - pods
