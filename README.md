@@ -6,9 +6,10 @@ A Kubernetes operator for deploying and managing LogicMonitor Container Monitori
 
 | Item | Status |
 |------|--------|
-| **OperatorHub** | Published ([community-operators-prod](https://github.com/redhat-openshift-ecosystem/community-operators-prod)) |
-| **Current Version** | 0.1.0 |
-| **Helm Chart Version** | lm-container 11.2.0 |
+| **OperatorHub** | [community-operators-prod PR #8609](https://github.com/redhat-openshift-ecosystem/community-operators-prod/pull/8609) merged Feb 2024, removed Feb 2024 (missing OCP version annotation). Resubmission pending as v0.2.0. |
+| **ArtifactHub** | Pending registration |
+| **Current Version** | 0.2.0 |
+| **Helm Chart Version** | lm-container 12.1.0 |
 
 This is a community-maintained operator and is not officially supported by LogicMonitor. It is available in OperatorHub under the **Community Operators** catalog source on OpenShift 4.12+ clusters.
 
@@ -74,13 +75,13 @@ Artifact Hub for LogicMonitor Helm Charts: https://artifacthub.io/packages/searc
 
 ### Option 1: OperatorHub (OLM)
 
-Install via the OpenShift Console:
+Once published to OperatorHub, install via the OpenShift Console:
 
-1. Navigate to **Operators > OperatorHub**
-2. Search for **"LogicMonitor"**
-3. Select **LogicMonitor Container Monitoring** from the Community Operators catalog
-4. Click **Install** and follow the prompts
-5. Create the credentials Secret and LMContainer CR (see below)
+1. Navigate to Operators > OperatorHub
+2. Search for "LogicMonitor"
+3. Click Install and follow the prompts
+
+If the operator is not yet available on OperatorHub, use the Manual Installation method below.
 
 ### Option 2: Manual Installation
 
@@ -196,7 +197,7 @@ spec:
         - clusterroles
         - priorityclasses
         - storageclasses
-        - endpoints
+        - endpointslices
         - ingresses
         - secrets
         - serviceaccounts
@@ -257,7 +258,7 @@ spec:
     collectors:
       - daemonsets
       - deployments
-      - endpoints
+      - endpointslices
       - nodes
       - pods
       - services
@@ -386,13 +387,13 @@ make run
 
 ```bash
 # Generate bundle
-make bundle VERSION=0.1.0
+make bundle VERSION=0.2.0
 
 # Build bundle image
-make bundle-build BUNDLE_IMG=your-registry/logicmonitor-operator-bundle:v0.1.0
+make bundle-build BUNDLE_IMG=your-registry/logicmonitor-operator-bundle:v0.2.0
 
 # Build catalog
-make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.1.0
+make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.2.0
 ```
 
 ## Project Structure
@@ -408,7 +409,7 @@ make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.1.
 │   ├── rbac/                 # RBAC configuration
 │   └── samples/              # Example CRs
 ├── helm-charts/
-│   └── lm-container/         # Embedded Helm chart (v11.2.0)
+│   └── lm-container/         # Embedded Helm chart (v12.1.0)
 ├── scripts/                  # Utility scripts
 └── docs/                     # Documentation
 ```
@@ -417,6 +418,7 @@ make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.1.
 
 | Operator Version | Helm Chart Version | OpenShift Version |
 |-----------------|-------------------|-------------------|
+| 0.2.x | lm-container 12.x | 4.12+ |
 | 0.1.x | lm-container 11.x | 4.12+ |
 
 ## Supported Platforms
