@@ -56,6 +56,9 @@ CONTAINER_TOOL ?= docker
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
 
+# Local bin directory for tool downloads
+LOCALBIN ?= $(shell pwd)/bin
+
 .PHONY: all
 all: docker-build
 

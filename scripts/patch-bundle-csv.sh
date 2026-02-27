@@ -23,7 +23,7 @@ echo "Patching bundle CSV with metadata from base CSV..."
 # Install yq if not available: brew install yq
 
 if ! command -v yq &> /dev/null; then
-    echo "Error: yq is required but not installed. Install with: brew install yq"
+    echo "Error: yq is required but not installed. Install with: brew install yq (macOS) or sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && sudo chmod +x /usr/local/bin/yq (Linux)"
     exit 1
 fi
 
