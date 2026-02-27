@@ -106,7 +106,7 @@ metadata:
                 "statefulsets",
                 "persistentvolumes",
                 "persistentvolumeclaims",
-                "endpoints",
+                "endpointslices",
                 "cronjobs",
                 "jobs",
                 "pods",
@@ -186,7 +186,7 @@ metadata:
                 "statefulsets",
                 "persistentvolumes",
                 "persistentvolumeclaims",
-                "endpoints",
+                "endpointslices",
                 "cronjobs",
                 "jobs",
                 "pods",
@@ -246,7 +246,7 @@ metadata:
                 "statefulsets",
                 "persistentvolumes",
                 "persistentvolumeclaims",
-                "endpoints",
+                "endpointslices",
                 "cronjobs",
                 "jobs",
                 "pods",
@@ -272,12 +272,12 @@ metadata:
         }
       ]
     capabilities: Basic Install
-    categories: Monitoring
-    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.1.0
-    createdAt: "2026-01-30T02:15:09Z"
-    description: Deploy LogicMonitor container monitoring on OpenShift clusters
+    createdAt: "2026-02-27T01:37:40Z"
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
     operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
+    categories: Monitoring
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.1.0
+    description: Deploy LogicMonitor container monitoring on OpenShift clusters
     repository: https://github.com/ryanmat/logicmonitor-openshift-operator
     support: LogicMonitor
   name: logicmonitor-openshift-operator.v0.1.0
