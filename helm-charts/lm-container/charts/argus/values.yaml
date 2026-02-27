@@ -130,6 +130,14 @@ lm:
       nodes: []
       etcd: []
 filters: []
+patchJob:
+  ttlSecondsAfterFinished: 1800  # delete this job from cluster after 30 mins
+  image:
+    registry: ""  # Optional: e.g., "public.ecr.aws/logicmonitor"
+    repository: ""  # Optional: only needed if registry requires additional path segment. Defaults to "logicmonitor" when no registry is set.
+    name: "kubectl"
+    tag: ""  # Defaults to version defined in lmutil.patchjob-image template
+    pullPolicy: ""  # Defaults to global.image.pullPolicy or "IfNotPresent"
 selfMonitor:
   enable: false
   port: 2112
@@ -234,6 +242,7 @@ rbac:
   create: true
 serviceAccount:
   create: true
+  # name: ""  # Optional: specify a custom service account name
 
 probe:
   enabled: true
@@ -246,3 +255,7 @@ probe:
   readiness:
     failureThreshold: 3
     periodSeconds: 10
+
+# extraObjects allows you to deploy additional Kubernetes resources alongside Argus
+# This is useful for deploying any other custom resources needed by your deployment
+extraObjects: []

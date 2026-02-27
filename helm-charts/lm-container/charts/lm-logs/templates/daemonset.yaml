@@ -16,29 +16,61 @@ spec:
         {{- include "fluentd.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "fluentd.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
+          {{- if .Values.securityContext }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
           image: {{ include "fluentd-image" . }}
           env:
             - name: K8S_NODE_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            {{ if gt (.Values.env | len) 0 }}
-            {{ include "ds-env" . | nindent 12 }}
-            {{ end }}
+            {{- if gt (len .Values.env) 0 }}
+            {{- include "ds-env" . | nindent 12 }}
+            {{- end }}
+            - name: LM_ACCOUNT
+              valueFrom:
+                secretKeyRef:
+                  {{- include "lm-logs.secretKeyRef" (dict "ctx" . "key" "account") | nindent 18 }}
+            - name: LM_ACCESS_ID
+              valueFrom:
+                secretKeyRef:
+                  {{- include "lm-logs.secretKeyRef" (dict "ctx" . "key" "accessID") | nindent 18 }}
+            - name: LM_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  {{- include "lm-logs.secretKeyRef" (dict "ctx" . "key" "accessKey") | nindent 18 }}
+            - name: LM_BEARER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  {{- include "lm-logs.secretKeyRef" (dict "ctx" . "key" "bearerToken") | nindent 18 }}
           imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             {{- toYaml .Values.volumeMounts | nindent 12 }}
+            {{- if eq (default "memory" .Values.fluent.buffer.type) "file" }}
+            - name: fluentbuffer
+              mountPath: {{ .Values.fluent.buffer.file.mountPath | default "/fluentd/buffer" }}
+            {{- end }}
       volumes:
         - name: fluentconf
           configMap:
             name: {{ include "fluentd.fullname" . }}
         {{- toYaml .Values.volumes | nindent 8 }}
+        {{- if eq (default "memory" .Values.fluent.buffer.type) "file" }}
+        - name: fluentbuffer
+          emptyDir:
+            {{- if .Values.fluent.buffer.file.sizeLimit }}
+            sizeLimit: {{ .Values.fluent.buffer.file.sizeLimit }}
+            {{- end }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

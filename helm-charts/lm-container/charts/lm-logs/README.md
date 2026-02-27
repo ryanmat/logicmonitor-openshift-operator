@@ -16,6 +16,20 @@ helm install -n <namespace> \
 lm-logs logicmonitor/lm-logs
 ```
 
+Install the lm-logs chart using a user defined secret for LM credentials.
+
+``` console
+# For LMv1
+helm install lm-logs logicmonitor/lm-logs -n <namespace> \
+  --set global.userDefinedSecret=lm-logs-credentials \
+  --set authMode=lmv1
+
+# For Bearer
+helm install lm-logs logicmonitor/lm-logs -n <namespace> \
+  --set global.userDefinedSecret=lm-logs-credentials \
+  --set authMode=bearer
+```
+
 #### Parameters
 The following tables lists the configurable parameters of the lm-logs chart and their default values.
 | Parameter                   | Description                                     | Default                                                 |
@@ -24,9 +38,11 @@ The following tables lists the configurable parameters of the lm-logs chart and 
 | `global.nameOverride`       | Global storage class for dynamic provisioning   | `""`                                                    |
 | `global.fullnameOverride`   | Global storage class for dynamic provisioning   | `""`                                                    |
 | `global.lm_company_name`    | LogicMonitor account name                       | `nil`                                                   |
+| `global.userDefinedSecret`  | User Defined Secret for LM credentials          | `""`                                                    |
 | `global.lm_company_domain`  | LogicMonitor company domain name                | `logicmonitor.com`                                      |
 | `global.lm_access_id`       | LogicMonitor API Token Access ID                | `nil`                                                   |
 | `global.lm_access_key`      | LogicMonitor API Token Access Key               | `nil`                                                   |
+| `authMode`                  | Mode to use for authenticating requests sent to LM. Can we lmv1/bearer  | `lmv1`                          |
 | `image.repository`          | Container image repository                      | `logicmonitor/lm-logs-k8s-fluentd`                      |
 | `image.pullPolicy`          | Container image pull policy                     | `IfNotPresent`                                          |
 | `image.tag`                 | Container image tag                             | `""`                                                    |
@@ -36,7 +52,18 @@ The following tables lists the configurable parameters of the lm-logs chart and 
 | `fluent.device_less_logs`   | beta feature. when set true, do not send resource information. send `service` and `namespace` as metadata when true  | `false`                                                 |
 | `fluent.include_metadata`   | if true send all metadata along with log msg    | `true`                                                  |
 | `fluent.resource_type`      | If specified, the value will be statically applied to all ingested logs.  | `""`    |
-| `fluent.buffer.memory`      | fluentd's buffer memory plugin config           | `flush_interval 1s,chunk_limit_size 8m,flush_thread_count 8`|
+| `fluent.buffer.type`                  | Buffer type: `memory` or `file`                              | `memory`           |
+| `fluent.buffer.memory.flush_interval`      | Flush interval for memory buffer                      | `1s`               |
+| `fluent.buffer.memory.chunk_limit_size`    | Chunk limit size for memory buffer                    | `8m`               |
+| `fluent.buffer.memory.flush_thread_count`  | Number of flush threads for memory buffer             | `8`                |
+| `fluent.buffer.memory.total_limit_size`    | Total buffer size limit for memory buffer             | `512m`             |
+| `fluent.buffer.memory.compress`            | Compression type for memory buffer (`text` or `gzip`) | `gzip`             |
+| `fluent.buffer.file.path`                  | Prefix path for file buffer chunks                    | `/fluentd/buffer/lm-logs` |
+| `fluent.buffer.file.flush_interval`        | Flush interval for file buffer                        | `1s`               |
+| `fluent.buffer.file.chunk_limit_size`      | Chunk limit size for file buffer                      | `8m`               |
+| `fluent.buffer.file.flush_thread_count`    | Number of flush threads for file buffer               | `8`                |
+| `fluent.buffer.file.total_limit_size`      | Total buffer size limit for file buffer               | `8g`               |
+| `fluent.buffer.file.compress`              | Compression type for file buffer (`text` or `gzip`)   | `gzip`             |
 | `tolerations`               | Tolerations for pod assignment	                | `{}`  (evaluated as a template)                         |
 | `nodeSelectors`             | Node labels for pod assignment		            | `{}`  (evaluated as a template)                         |
 | `affinity`                  | Affinity for pod assignment		                | `{}`  (evaluated as a template)                         |
@@ -45,6 +72,45 @@ The following tables lists the configurable parameters of the lm-logs chart and 
 | `kubernetes.cluster_name`       | ClusterName given while adding k8s cluster  	| `""`                                                |
 | `kubernetes.multiline_concat_key`       | Key to look for fluentD to concatenate multiline logs   	| `"log"`                     |
 
+
+#### Buffer configuration (Fluentd)
+
+The chart supports configuring all Fluentd buffer parameters. You can switch the buffer type between `memory` and `file`.
+
+##### Defaults (Memory buffer)
+
+By default, the chart uses the memory buffer with the following defaults:
+
+```yaml
+buffer:
+  type: memory
+  memory:
+    flush_interval: 1s
+    chunk_limit_size: 8m
+    flush_thread_count: 8
+    total_limit_size: 512m
+    compress: gzip   # text|gzip
+```
+
+All parameters are configurable.
+
+##### File buffer
+
+You can switch to file buffering by setting `type=file`:
+
+```yaml
+buffer:
+  type: file
+  file:
+    path: /fluentd/buffer/lm-logs
+    flush_interval: 1s
+    chunk_limit_size: 8m
+    flush_thread_count: 8
+    total_limit_size: 8g
+    compress: gzip
+```
+
+All parameters are configurable, with the values above as defaults.
 
 ### Available Environment variables
 For descriptions see: https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter
@@ -61,6 +127,14 @@ For descriptions see: https://github.com/fabric8io/fluent-plugin-kubernetes_meta
 * FLUENT_KUBERNETES_METADATA_SKIP_MASTER_URL
 * FLUENT_KUBERNETES_METADATA_SKIP_NAMESPACE_METADATA
 
+#### User Defined Secret for LM credentials
+You can create a kubernetes secret with your LM credentials and pass the secret name to the chart.
+The secret must contain the following keys:
+- account
+- accessID
+- accessKey
+- bearerToken (if accessKey/accessID is not present in the secret)
+  Also, the authMode needs to be set accordingly. If the secret contains accessID/accessKey, authMode should be set to lmv1, otherwise bearer (similarly it should be set for the configurable parameters).
 #### New deviceless logs k8s integration (beta)
 Note: This feature may not be available to all customers.
 To enable this feature set `fluent.device_less_logs=true`
