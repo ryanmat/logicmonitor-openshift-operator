@@ -119,8 +119,6 @@ rules:
       - patch
       - update
       - watch
-      - bind
-      - escalate
 
   ##
   ## Networking API resources
