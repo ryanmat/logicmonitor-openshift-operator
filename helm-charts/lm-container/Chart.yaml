@@ -7,7 +7,7 @@ dependencies:
   - logicmonitor
   - argus
   - monitoring
-  version: 14.1.0
+  version: 15.0.1
 - condition: collectorset-controller.enabled
   name: collectorset-controller
   repository: https://logicmonitor.github.io/helm-charts
@@ -15,7 +15,7 @@ dependencies:
   - logicmonitor
   - collectorset-controller
   - monitoring
-  version: 12.1.0
+  version: 12.2.0
 - condition: lm-logs.enabled
   name: lm-logs
   repository: https://logicmonitor.github.io/helm-charts
@@ -37,7 +37,7 @@ dependencies:
 - condition: kube-state-metrics.enabled
   name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
-  version: 7.2.0
+  version: 7.1.0
 - name: lmutil
   repository: https://logicmonitor.github.io/helm-charts
   version: 0.1.10
@@ -49,4 +49,4 @@ maintainers:
   name: LogicMonitor
 name: lm-container
 type: application
-version: 12.1.0
+version: 13.0.0

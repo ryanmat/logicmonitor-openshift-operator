@@ -3,4 +3,4 @@ dependencies:
   repository: https://logicmonitor.github.io/helm-charts
   version: 0.1.10
 digest: sha256:72e47ea4509a5d533ae97abdee0e946d3d722e6488d683fc76b5b6d49abf9c48
-generated: "2025-12-16T06:25:17.018441669Z"
+generated: "2026-03-05T06:12:17.125188378Z"

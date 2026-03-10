@@ -14,9 +14,6 @@ LABEL operators.operatorframework.io.metrics.project_layout=helm.sdk.operatorfra
 LABEL operators.operatorframework.io.test.mediatype.v1=scorecard+v1
 LABEL operators.operatorframework.io.test.config.v1=tests/scorecard/
 
-# OpenShift version compatibility.
-LABEL com.redhat.openshift.versions=v4.12
-
 # Copy files to locations specified by labels.
 COPY bundle/manifests /manifests/
 COPY bundle/metadata /metadata/

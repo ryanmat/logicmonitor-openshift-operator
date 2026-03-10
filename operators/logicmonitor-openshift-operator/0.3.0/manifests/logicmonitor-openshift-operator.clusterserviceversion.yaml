@@ -272,15 +272,15 @@ metadata:
         }
       ]
     capabilities: Basic Install
-    createdAt: "2026-02-27T01:39:25Z"
+    categories: Monitoring
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.0
+    createdAt: "2026-03-10T16:56:16Z"
+    description: Deploy LogicMonitor container monitoring on OpenShift clusters
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
     operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
-    categories: Monitoring
-    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.2.0
-    description: Deploy LogicMonitor container monitoring on OpenShift clusters
     repository: https://github.com/ryanmat/logicmonitor-openshift-operator
     support: LogicMonitor
-  name: logicmonitor-openshift-operator.v0.2.0
+  name: logicmonitor-openshift-operator.v0.3.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -455,8 +455,6 @@ spec:
                 - patch
                 - update
                 - watch
-                - bind
-                - escalate
             - apiGroups:
                 - networking.k8s.io
               resources:
@@ -582,7 +580,7 @@ spec:
                       - --leader-elect
                       - --leader-election-id=logicmonitor-openshift-operator
                       - --health-probe-bind-address=:8081
-                    image: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.2.0
+                    image: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.0
                     livenessProbe:
                       httpGet:
                         path: /healthz
@@ -599,10 +597,10 @@ spec:
                     resources:
                       limits:
                         cpu: 500m
-                        memory: 128Mi
+                        memory: 512Mi
                       requests:
                         cpu: 10m
-                        memory: 64Mi
+                        memory: 128Mi
                     securityContext:
                       allowPrivilegeEscalation: false
                       capabilities:
@@ -679,4 +677,4 @@ spec:
   provider:
     name: LogicMonitor
     url: https://www.logicmonitor.com
-  version: 0.2.0
+  version: 0.3.0
