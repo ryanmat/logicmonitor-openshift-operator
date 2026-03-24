@@ -6,7 +6,7 @@ A Kubernetes operator for deploying and managing LogicMonitor Container Monitori
 
 | Item | Status |
 |------|--------|
-| **OperatorHub** | [community-operators-prod PR #9035](https://github.com/redhat-openshift-ecosystem/community-operators-prod/pull/9035) (v0.3.0) submitted. |
+| **OperatorHub** | Published (v0.3.0) — available in Community Operators catalog on OpenShift 4.12+ |
 | **ArtifactHub** | Pending registration |
 | **Current Version** | 0.3.0 |
 | **Helm Chart Version** | lm-container 13.0.0 |
