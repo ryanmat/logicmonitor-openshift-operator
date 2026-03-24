@@ -35,6 +35,8 @@ spec:
         - serviceaccounts
         - poddisruptionbudgets
         - customresourcedefinitions
+    jobs:
+      eventMode: "logs"
     collector:
       replicas: 2
       size: "large"

@@ -211,8 +211,6 @@ spec:
               echo "Applying deployment patch..."
               kubectl patch deployment {{ include "lmutil.fullname" . }} -n {{ .Release.Namespace }} --type=strategic --patch "$PATCH_CONTENT"
 
-              # Scale the deployment
-              kubectl scale deployment {{ include "lmutil.fullname" . }} --replicas=1 -n {{ .Release.Namespace }}
           env:
             - name: HOME
               value: /tmp

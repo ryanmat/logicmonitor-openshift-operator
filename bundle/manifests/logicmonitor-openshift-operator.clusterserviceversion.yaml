@@ -276,8 +276,8 @@ metadata:
       ]
     capabilities: Basic Install
     categories: Monitoring
-    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.1-rc2
-    createdAt: "2026-03-24T18:42:19Z"
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.1
+    createdAt: "2026-03-24T19:30:28Z"
     description: Deploy LogicMonitor container monitoring on OpenShift clusters
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
     operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
@@ -684,7 +684,7 @@ spec:
                       - --leader-elect
                       - --leader-election-id=logicmonitor-openshift-operator
                       - --health-probe-bind-address=:8081
-                    image: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.1-rc2
+                    image: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.1
                     livenessProbe:
                       httpGet:
                         path: /healthz

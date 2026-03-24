@@ -267,9 +267,6 @@ spec:
               echo "Applying deployment patch..."
               kubectl patch deployment {{ include "lmutil.fullname" . }} -n {{ .Release.Namespace }} --type=strategic --patch "$PATCH_CONTENT"
 
-              # Scale the deployment
-              kubectl scale deployment {{ include "lmutil.fullname" . }} --replicas={{ .Values.replicas }} -n {{ .Release.Namespace }}
-
               # Pre-create collector group via LM API if it does not exist.
               # CSC should auto-create this group but has a bug where it retries GET
               # without ever creating the group. This workaround ensures the group
@@ -278,8 +275,10 @@ spec:
               # failure should not abort the entire post-install hook.
               set +e
               CLUSTER_NAME="{{ .Values.clusterName }}"
-              GROUP_NAME="Kubernetes Cluster: ${CLUSTER_NAME}"
-              if [ -n "$SECRET_ACCESSID" ] && [ -n "$SECRET_ACCESSKEY" ] && [ -n "$SECRET_ACCOUNT" ]; then
+              if [ -z "$CLUSTER_NAME" ]; then
+                echo "Warning: clusterName is empty, skipping collector group creation"
+              elif [ -n "$SECRET_ACCESSID" ] && [ -n "$SECRET_ACCESSKEY" ] && [ -n "$SECRET_ACCOUNT" ]; then
+                GROUP_NAME="Kubernetes Cluster: ${CLUSTER_NAME}"
                 # Determine company domain for API URL
                 if [ "$HAS_COMPANY_DOMAIN" = "true" ] && [ -n "$COMPANY_DOMAIN_VALUE" ]; then
                   API_DOMAIN="${SECRET_ACCOUNT}.${COMPANY_DOMAIN_VALUE}"
@@ -322,36 +321,38 @@ spec:
                   echo "LMv1 ${SECRET_ACCESSID}:${signature}:${epoch}"
                 }
 
-                # Check if collector group exists
-                echo "Checking if collector group '${GROUP_NAME}' exists..."
+                # Create collector group via POST. POST-first is more robust than
+                # GET-then-POST because it avoids filter syntax issues with special
+                # characters in group names (the colon in "Kubernetes Cluster: ...")
+                # and produces clear error messages for every failure mode.
+                echo "Ensuring collector group '${GROUP_NAME}' exists..."
                 RESOURCE_PATH="/setting/collector/groups"
-                AUTH=$(lm_auth "GET" "$RESOURCE_PATH" "")
-                ENCODED_NAME=$(printf "%s" "$GROUP_NAME" | jq -sRr @uri)
-                RESPONSE=$(curl -s -X GET "${API_BASE}${RESOURCE_PATH}?filter=name%3A%22${ENCODED_NAME}%22" \
+                POST_DATA=$(jq -n --arg name "$GROUP_NAME" '{"name":$name,"autoBalance":true}')
+                AUTH=$(lm_auth "POST" "$RESOURCE_PATH" "$POST_DATA")
+                HTTP_CODE=$(curl -s -o /tmp/lm_cg_response.json -w "%{http_code}" \
+                  -X POST "${API_BASE}${RESOURCE_PATH}" \
                   -H "Authorization: ${AUTH}" \
                   -H "Content-Type: application/json" \
-                  -H "X-Version: 3")
+                  -H "X-Version: 3" \
+                  -d "$POST_DATA")
+                CG_RESPONSE=$(cat /tmp/lm_cg_response.json 2>/dev/null)
+                echo "DEBUG: Collector group API: HTTP=${HTTP_CODE} response=${CG_RESPONSE}"
 
-                TOTAL=$(echo "$RESPONSE" | jq -r '.total // 0' 2>/dev/null)
-                if [ "$TOTAL" -gt 0 ] 2>/dev/null; then
-                  GROUP_ID=$(echo "$RESPONSE" | jq -r '.items[0].id' 2>/dev/null)
-                  echo "Collector group '${GROUP_NAME}' already exists (ID: ${GROUP_ID})"
-                else
-                  echo "Collector group '${GROUP_NAME}' does not exist, creating..."
-                  POST_DATA=$(jq -n --arg name "$GROUP_NAME" '{"name":$name,"autoBalance":true}')
-                  AUTH=$(lm_auth "POST" "$RESOURCE_PATH" "$POST_DATA")
-                  CREATE_RESPONSE=$(curl -s -X POST "${API_BASE}${RESOURCE_PATH}" \
-                    -H "Authorization: ${AUTH}" \
-                    -H "Content-Type: application/json" \
-                    -H "X-Version: 3" \
-                    -d "$POST_DATA")
-                  NEW_ID=$(echo "$CREATE_RESPONSE" | jq -r '.id // "unknown"' 2>/dev/null)
-                  if [ "$NEW_ID" != "null" ] && [ "$NEW_ID" != "unknown" ]; then
-                    echo "Collector group '${GROUP_NAME}' created (ID: ${NEW_ID})"
+                NEW_ID=$(echo "$CG_RESPONSE" | jq -r '.id // empty' 2>/dev/null)
+                if [ -n "$NEW_ID" ]; then
+                  echo "Collector group '${GROUP_NAME}' created (ID: ${NEW_ID})"
+                elif echo "$CG_RESPONSE" | jq -e '.errorMessage' >/dev/null 2>&1; then
+                  ERROR_MSG=$(echo "$CG_RESPONSE" | jq -r '.errorMessage' 2>/dev/null)
+                  ERROR_CODE=$(echo "$CG_RESPONSE" | jq -r '.errorCode // "unknown"' 2>/dev/null)
+                  if echo "$ERROR_MSG" | grep -qi "already exist"; then
+                    echo "Collector group '${GROUP_NAME}' already exists (API confirmed)"
                   else
-                    echo "Warning: failed to create collector group. CSC will retry. Response: ${CREATE_RESPONSE}"
+                    echo "Warning: collector group API error (code=${ERROR_CODE}): ${ERROR_MSG}"
                   fi
+                else
+                  echo "Warning: unexpected response (HTTP ${HTTP_CODE}). CSC will retry."
                 fi
+                rm -f /tmp/lm_cg_response.json
               else
                 echo "Credentials not available, skipping collector group creation"
               fi

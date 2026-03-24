@@ -77,6 +77,13 @@ both hook templates so they only run on initial install.
 - `charts/argus/templates/post-install.yaml`
 - `charts/collectorset-controller/templates/post-install.yaml`
 
+**Part C -- Removed redundant scale calls:** With deployment templates now setting the
+correct replica count (Part A), the `kubectl scale` calls in post-install hooks are no-ops.
+Removed to eliminate dead code and any residual drift risk if hook timing races with the
+reconciler.
+- `charts/argus/templates/post-install.yaml`: removed `kubectl scale` call
+- `charts/collectorset-controller/templates/post-install.yaml`: removed `kubectl scale` call
+
 ### Affected Templates
 - `charts/argus/templates/post-install.yaml`
 - `charts/collectorset-controller/templates/post-install.yaml`
@@ -120,8 +127,13 @@ specific API permission that is not documented.
 ### Workaround Applied in v0.3.1
 
 Added collector group auto-creation to the argus post-install hook. After credential
-extraction, the hook calls the LM REST API to create "Kubernetes Cluster: <clusterName>"
-if it does not exist. Uses LMv1 HMAC-SHA256 auth with the credentials from userDefinedSecret.
+extraction, the hook calls the LM REST API to POST-create "Kubernetes Cluster: <clusterName>".
+Uses LMv1 HMAC-SHA256 auth with the credentials from userDefinedSecret.
+
+Uses POST-first approach (attempt creation, handle "already exists" gracefully) rather than
+GET-then-POST. This avoids LM API filter syntax issues with the colon character in the
+group name "Kubernetes Cluster: ..." and provides clear diagnostic logging for every
+failure mode (auth errors, network issues, duplicate groups).
 
 CSC starts in parallel and retries every 60s. The hook completes within seconds, so CSC
 finds the group on its next retry cycle.
