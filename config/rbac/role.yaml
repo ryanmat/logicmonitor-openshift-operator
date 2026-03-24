@@ -1,5 +1,5 @@
 # Description: ClusterRole for the LogicMonitor operator manager.
-# Description: Defines permissions needed to manage LMContainer resources and Helm releases.
+# Description: Defines permissions needed to manage LMContainer resources, Helm releases, and child component RBAC delegation.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -12,7 +12,7 @@ rules:
   ## Base operator rules
   ##
 
-  # Namespaces - read to verify existence
+  # Namespaces - read and update (argus child role requires update)
   - apiGroups:
       - ""
     resources:
@@ -21,6 +21,7 @@ rules:
       - get
       - list
       - watch
+      - update
 
   ##
   ## Rules for monitoring.logicmonitor.com/v1alpha1, Kind: LMContainer
@@ -41,7 +42,26 @@ rules:
       - watch
 
   ##
+  ## Rules for logicmonitor.com CollectorSet CRD (managed by collectorset-controller)
+  ##
+  - apiGroups:
+      - logicmonitor.com
+    resources:
+      - collectorsets
+      - collectorsets/status
+      - collectorsets/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
   ## Core API resources - needed by Helm chart components
+  ## Includes resources required by argus, collectorset-controller, and collector child roles
   ##
   - apiGroups:
       - ""
@@ -56,9 +76,20 @@ rules:
       - configmaps
       - secrets
       - serviceaccounts
+      - nodes
+      - nodes/metrics
+      - nodes/proxy
+      - nodes/stats
+      - componentstatuses
+      - containers
+      - limitranges
+      - persistentvolumes
+      - replicationcontrollers
+      - resourcequotas
     verbs:
       - create
       - delete
+      - deletecollection
       - get
       - list
       - patch
@@ -72,6 +103,7 @@ rules:
       - apps
     resources:
       - deployments
+      - deployments/scale
       - daemonsets
       - replicasets
       - statefulsets
@@ -103,6 +135,8 @@ rules:
 
   ##
   ## RBAC API resources - needed to create roles for components
+  ## escalate + bind required because child chart ClusterRoles use wildcard verbs
+  ## and aggregationRules that require elevated RBAC privileges to create
   ##
   - apiGroups:
       - rbac.authorization.k8s.io
@@ -119,6 +153,8 @@ rules:
       - patch
       - update
       - watch
+      - escalate
+      - bind
 
   ##
   ## Networking API resources
@@ -127,6 +163,7 @@ rules:
       - networking.k8s.io
     resources:
       - ingresses
+      - ingressclasses
       - networkpolicies
     verbs:
       - create
@@ -230,5 +267,108 @@ rules:
       - patch
       - update
       - watch
+
+  ##
+  ## API Extensions - CRDs managed by the Helm chart (CollectorSet CRD)
+  ##
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+
+  ##
+  ## Storage API - storageclasses monitored by argus/collector
+  ##
+  - apiGroups:
+      - storage.k8s.io
+    resources:
+      - storageclasses
+      - volumeattachments
+    verbs:
+      - list
+      - get
+      - watch
+      - update
+
+  ##
+  ## Scheduling API - priorityclasses monitored by argus/collector
+  ##
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - list
+      - get
+      - watch
+      - update
+
+  ##
+  ## Cert-Manager API - certificates monitored by collector
+  ##
+  - apiGroups:
+      - cert-manager.io
+    resources:
+      - certificates
+    verbs:
+      - list
+      - get
+
+  ##
+  ## Extensions API (legacy) - required by collector child role
+  ##
+  - apiGroups:
+      - extensions
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - list
+      - get
+
+  ##
+  ## Admission registration - webhooks monitored by kube-state-metrics
+  ##
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - mutatingwebhookconfigurations
+      - validatingwebhookconfigurations
+    verbs:
+      - list
+      - watch
+
+  ##
+  ## Certificates API - CSRs monitored by kube-state-metrics
+  ##
+  - apiGroups:
+      - certificates.k8s.io
+    resources:
+      - certificatesigningrequests
+    verbs:
+      - list
+      - watch
+
+  ##
+  ## Non-resource URLs - required by argus and collector for health checks and metrics
+  ##
+  - nonResourceURLs:
+      - /
+      - /healthz
+      - /healthz/*
+      - /metrics
+      - /proxy
+    verbs:
+      - get
 
   # +kubebuilder:scaffold:rules

@@ -6,7 +6,7 @@ metadata:
     {{- include "collectorset-controller.labels" . | nindent 4}}
     app.kubernetes.io/job: config-updater
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook": post-install
     "helm.sh/hook-delete-policy": before-hook-creation
     {{- include "collectorset-controller.annotations" . | nindent 4}}
 spec:

@@ -6,7 +6,7 @@ metadata:
     {{- include "argus.labels" . | nindent 4 }}
     app.kubernetes.io/job: config-updater
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook": post-install
     "helm.sh/hook-delete-policy": before-hook-creation
     {{- include "argus.annotations" . | nindent 4 }}
 
@@ -269,6 +269,93 @@ spec:
 
               # Scale the deployment
               kubectl scale deployment {{ include "lmutil.fullname" . }} --replicas={{ .Values.replicas }} -n {{ .Release.Namespace }}
+
+              # Pre-create collector group via LM API if it does not exist.
+              # CSC should auto-create this group but has a bug where it retries GET
+              # without ever creating the group. This workaround ensures the group
+              # exists before CSC needs it.
+              # Wrapped in set +e because this is best-effort -- a transient API
+              # failure should not abort the entire post-install hook.
+              set +e
+              CLUSTER_NAME="{{ .Values.clusterName }}"
+              GROUP_NAME="Kubernetes Cluster: ${CLUSTER_NAME}"
+              if [ -n "$SECRET_ACCESSID" ] && [ -n "$SECRET_ACCESSKEY" ] && [ -n "$SECRET_ACCOUNT" ]; then
+                # Determine company domain for API URL
+                if [ "$HAS_COMPANY_DOMAIN" = "true" ] && [ -n "$COMPANY_DOMAIN_VALUE" ]; then
+                  API_DOMAIN="${SECRET_ACCOUNT}.${COMPANY_DOMAIN_VALUE}"
+                else
+                  API_DOMAIN="${SECRET_ACCOUNT}.{{ .Values.global.companyDomain | default "logicmonitor.com" }}"
+                fi
+                API_BASE="https://${API_DOMAIN}/santaba/rest"
+
+                # HMAC-SHA256 using standard POSIX tools (no openssl needed).
+                # The patchjob image does not include openssl and runs as
+                # non-root so packages cannot be installed at runtime.
+                hmac_sha256() {
+                  local key="$1"
+                  local msg="$2"
+                  local key_hex=$(printf '%s' "$key" | xxd -p -c 256)
+                  if [ ${#key_hex} -gt 128 ]; then
+                    key_hex=$(printf '%s' "$key" | sha256sum | cut -d' ' -f1)
+                  fi
+                  while [ ${#key_hex} -lt 128 ]; do key_hex="${key_hex}00"; done
+                  local ipad="" opad="" i=0
+                  while [ $i -lt 128 ]; do
+                    local byte_dec=$(printf '%d' "0x${key_hex:$i:2}")
+                    ipad="${ipad}$(printf '%02x' $(( byte_dec ^ 54 )))"
+                    opad="${opad}$(printf '%02x' $(( byte_dec ^ 92 )))"
+                    i=$((i + 2))
+                  done
+                  local inner=$(printf '%b%s' "$(echo "$ipad" | sed 's/../\\x&/g')" "$msg" | sha256sum | cut -d' ' -f1)
+                  printf '%b%b' "$(echo "$opad" | sed 's/../\\x&/g')" "$(echo "$inner" | sed 's/../\\x&/g')" | sha256sum | cut -d' ' -f1
+                }
+
+                # LMv1 auth header generator
+                lm_auth() {
+                  local http_verb="$1"
+                  local resource_path="$2"
+                  local data="$3"
+                  local epoch=$(date +%s000)
+                  local request_vars="${http_verb}${epoch}${data}${resource_path}"
+                  local sig_hex=$(hmac_sha256 "$SECRET_ACCESSKEY" "$request_vars")
+                  local signature=$(echo "$sig_hex" | xxd -r -p | base64 | tr -d '\n')
+                  echo "LMv1 ${SECRET_ACCESSID}:${signature}:${epoch}"
+                }
+
+                # Check if collector group exists
+                echo "Checking if collector group '${GROUP_NAME}' exists..."
+                RESOURCE_PATH="/setting/collector/groups"
+                AUTH=$(lm_auth "GET" "$RESOURCE_PATH" "")
+                ENCODED_NAME=$(printf "%s" "$GROUP_NAME" | jq -sRr @uri)
+                RESPONSE=$(curl -s -X GET "${API_BASE}${RESOURCE_PATH}?filter=name%3A%22${ENCODED_NAME}%22" \
+                  -H "Authorization: ${AUTH}" \
+                  -H "Content-Type: application/json" \
+                  -H "X-Version: 3")
+
+                TOTAL=$(echo "$RESPONSE" | jq -r '.total // 0' 2>/dev/null)
+                if [ "$TOTAL" -gt 0 ] 2>/dev/null; then
+                  GROUP_ID=$(echo "$RESPONSE" | jq -r '.items[0].id' 2>/dev/null)
+                  echo "Collector group '${GROUP_NAME}' already exists (ID: ${GROUP_ID})"
+                else
+                  echo "Collector group '${GROUP_NAME}' does not exist, creating..."
+                  POST_DATA=$(jq -n --arg name "$GROUP_NAME" '{"name":$name,"autoBalance":true}')
+                  AUTH=$(lm_auth "POST" "$RESOURCE_PATH" "$POST_DATA")
+                  CREATE_RESPONSE=$(curl -s -X POST "${API_BASE}${RESOURCE_PATH}" \
+                    -H "Authorization: ${AUTH}" \
+                    -H "Content-Type: application/json" \
+                    -H "X-Version: 3" \
+                    -d "$POST_DATA")
+                  NEW_ID=$(echo "$CREATE_RESPONSE" | jq -r '.id // "unknown"' 2>/dev/null)
+                  if [ "$NEW_ID" != "null" ] && [ "$NEW_ID" != "unknown" ]; then
+                    echo "Collector group '${GROUP_NAME}' created (ID: ${NEW_ID})"
+                  else
+                    echo "Warning: failed to create collector group. CSC will retry. Response: ${CREATE_RESPONSE}"
+                  fi
+                fi
+              else
+                echo "Credentials not available, skipping collector group creation"
+              fi
+              set -e
 
               # Patch collectorset if proxyUser or collectorProxyUser is found in userDefinedSecret
               if [ -n "{{ .Values.global.userDefinedSecret }}" ] && [ "$SECRET_DATA" != "null" ] && [ -n "$SECRET_DATA" ]; then
