@@ -2,6 +2,26 @@
 
 All notable changes to the LogicMonitor OpenShift Operator are documented here.
 
+## [0.3.2] - 2026-03-26
+
+### Fixed
+- Added `global.companyDomain: "logicmonitor.com"` to all sample CRs. When using
+  `userDefinedSecret`, the argus Deployment pod crashes without this field because
+  the API URL resolves to `https://account.` instead of `https://account.logicmonitor.com`.
+
+### Added
+- Known issues documentation for `companyDomain` requirement when using
+  `userDefinedSecret`.
+- Known issues documentation for `lm-logs` subchart incompatibility with the
+  operator (requires inline credentials not supported by the operator).
+- Documented argus built-in log forwarding (`k8sevent`, `k8spodlog`) as the
+  supported alternative to the `lm-logs` subchart.
+
+### Known Issues
+- `lm-logs` and `lmotel` subcharts cannot be enabled via the operator. They require
+  inline credentials. Use argus built-in log forwarding instead.
+- See `docs/product-bugs-lm-container-v13.md` for all upstream chart bugs (5 total).
+
 ## [0.3.1] - 2026-03-24
 
 ### Fixed
