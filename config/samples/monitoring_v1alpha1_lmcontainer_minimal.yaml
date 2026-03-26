@@ -9,6 +9,7 @@ spec:
   global:
     # Reference to Secret containing accessID, accessKey, account
     userDefinedSecret: "lm-credentials"
+    companyDomain: "logicmonitor.com"
   argus:
     # REQUIRED: Unique cluster name in LogicMonitor
     clusterName: "my-cluster"

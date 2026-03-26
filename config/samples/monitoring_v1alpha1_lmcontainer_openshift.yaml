@@ -16,6 +16,7 @@ spec:
   global:
     # Use Secret-based credentials
     userDefinedSecret: "lm-credentials"
+    companyDomain: "logicmonitor.com"
 
   argus:
     enabled: true

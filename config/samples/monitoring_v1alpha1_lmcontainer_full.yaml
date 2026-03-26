@@ -23,10 +23,9 @@ spec:
     # accessID: "your-access-id"
     # accessKey: "your-access-key"
 
-    # LogicMonitor domain
-    # Leave empty for standard logicmonitor.com
-    # Use "lmgov.us" for government cloud
-    companyDomain: ""
+    # REQUIRED when using userDefinedSecret: LogicMonitor portal domain
+    # Use "logicmonitor.com" for standard cloud, "lmgov.us" for government cloud
+    companyDomain: "logicmonitor.com"
 
     # Global image overrides
     image:

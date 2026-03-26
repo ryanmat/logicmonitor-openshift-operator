@@ -54,6 +54,7 @@ metadata:
               "enabled": true
             },
             "global": {
+              "companyDomain": "logicmonitor.com",
               "userDefinedSecret": "lm-credentials"
             },
             "kube-state-metrics": {
@@ -95,7 +96,7 @@ metadata:
               "enabled": true
             },
             "global": {
-              "companyDomain": "",
+              "companyDomain": "logicmonitor.com",
               "image": {
                 "pullPolicy": "Always",
                 "registry": ""
@@ -145,6 +146,7 @@ metadata:
               "clusterName": "my-cluster"
             },
             "global": {
+              "companyDomain": "logicmonitor.com",
               "userDefinedSecret": "lm-credentials"
             }
           }
@@ -180,6 +182,7 @@ metadata:
               "enabled": true
             },
             "global": {
+              "companyDomain": "logicmonitor.com",
               "userDefinedSecret": "lm-credentials"
             },
             "kube-state-metrics": {
@@ -235,7 +238,7 @@ metadata:
               "accessKey": "",
               "account": "",
               "collectorsetServiceNameSuffix": "lm-container-collectorset-controller",
-              "companyDomain": "",
+              "companyDomain": "logicmonitor.com",
               "image": {
                 "pullPolicy": "",
                 "registry": ""
@@ -276,17 +279,17 @@ metadata:
       ]
     capabilities: Basic Install
     categories: Monitoring
-    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.1
-    createdAt: "2026-03-24T19:30:28Z"
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.2
+    createdAt: "2026-03-26T16:59:15Z"
     description: Deploy LogicMonitor container monitoring on OpenShift clusters
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
     operators.operatorframework.io/project_layout: helm.sdk.operatorframework.io/v1
     repository: https://github.com/ryanmat/logicmonitor-openshift-operator
     support: LogicMonitor
-  name: logicmonitor-openshift-operator.v0.3.1
+  name: logicmonitor-openshift-operator.v0.3.2
   namespace: placeholder
 spec:
-  replaces: logicmonitor-openshift-operator.v0.3.0
+  replaces: logicmonitor-openshift-operator.v0.3.1
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
@@ -349,6 +352,7 @@ spec:
        spec:
          global:
            userDefinedSecret: "lm-credentials"
+           companyDomain: "logicmonitor.com"
          argus:
            clusterName: "my-openshift-cluster"
        ```
@@ -685,7 +689,7 @@ spec:
                       - --leader-elect
                       - --leader-election-id=logicmonitor-openshift-operator
                       - --health-probe-bind-address=:8081
-                    image: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.1
+                    image: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.2
                     livenessProbe:
                       httpGet:
                         path: /healthz
@@ -782,4 +786,4 @@ spec:
   provider:
     name: LogicMonitor
     url: https://www.logicmonitor.com
-  version: 0.3.1
+  version: 0.3.2

@@ -33,9 +33,9 @@ spec:
     # When set, the inline credential fields above are ignored
     userDefinedSecret: ""
 
-    # LogicMonitor domain (leave empty for standard logicmonitor.com)
-    # Use "lmgov.us" for government cloud
-    companyDomain: ""
+    # REQUIRED when using userDefinedSecret: LogicMonitor portal domain
+    # Use "logicmonitor.com" for standard cloud, "lmgov.us" for government cloud
+    companyDomain: "logicmonitor.com"
 
     # Image configuration overrides (optional)
     image:

@@ -12,6 +12,7 @@ metadata:
 spec:
   global:
     userDefinedSecret: "lm-credentials"
+    companyDomain: "logicmonitor.com"
   argus:
     enabled: true
     clusterName: "rm-rosa-cluster-operator"

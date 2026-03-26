@@ -5,7 +5,7 @@ metadata:
     alm-examples: '[]'
     capabilities: Basic Install
     categories: Monitoring
-    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.1
+    containerImage: ghcr.io/ryanmat/logicmonitor-openshift-operator:0.3.2
     createdAt: "2026-03-10T00:00:00Z"
     description: Deploy LogicMonitor container monitoring on OpenShift clusters
     operators.operatorframework.io/builder: operator-sdk-v1.42.0
@@ -77,6 +77,7 @@ spec:
        spec:
          global:
            userDefinedSecret: "lm-credentials"
+           companyDomain: "logicmonitor.com"
          argus:
            clusterName: "my-openshift-cluster"
        ```

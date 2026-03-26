@@ -1,8 +1,8 @@
 # Known Issues: lm-container v13.0.0
 
 This document covers known issues with the lm-container Helm chart v13.0.0 bundled in the
-LogicMonitor OpenShift Operator. Workarounds are applied in operator v0.3.1. These are
-pending upstream fixes in the lm-container chart.
+LogicMonitor OpenShift Operator. Workarounds are applied in operator v0.3.1 and v0.3.2. These are pending upstream fixes
+in the lm-container chart.
 
 For full technical details and evidence, see `docs/product-bugs-lm-container-v13.md`.
 
@@ -52,3 +52,52 @@ all permissions it delegates.
 
 **Operator v0.3.1 fix:** The operator ClusterRole includes all required permissions.
 No manual RBAC configuration should be needed when installing from OperatorHub.
+
+## companyDomain Required with Secret-Based Credentials
+
+When using `global.userDefinedSecret` for credentials (the recommended approach), you must
+also set `global.companyDomain` in your LMContainer CR. Without it, the argus discovery
+agent cannot construct the LogicMonitor API URL and will crash on startup.
+
+**Set this in your CR spec:**
+```yaml
+spec:
+  global:
+    userDefinedSecret: "lm-credentials"
+    companyDomain: "logicmonitor.com"    # Required
+```
+
+Use `"logicmonitor.com"` for standard cloud or `"lmgov.us"` for US Government cloud
+(FedRAMP).
+
+**Operator v0.3.2 fix:** All sample CRs now include `companyDomain`. If you installed
+using an earlier sample, add this field to your existing LMContainer CR.
+
+## LM Logs Subchart Not Supported
+
+The `lm-logs` subchart (Fluentd-based log collector) cannot be enabled via the operator.
+Setting `lm-logs.enabled: true` in the LMContainer CR will cause the operator to enter
+a reconciliation error loop.
+
+**Root cause:** The lm-logs templates require inline credentials (`lm_access_id`,
+`lm_access_key`, `lm_company_name`) as plain Helm values. The operator uses
+`userDefinedSecret` which provides credentials via Kubernetes Secret references. The
+lm-logs templates do not support this mechanism.
+
+**Workaround:** None via the operator. To collect pod logs with LogicMonitor, use the
+argus built-in log forwarding instead:
+```yaml
+spec:
+  argus:
+    lm:
+      lmlogs:
+        k8sevent:
+          enable: true     # Forward Kubernetes events
+        k8spodlog:
+          enable: true     # Forward pod logs
+```
+This uses the collector-based log ingestion path and works with `userDefinedSecret`.
+Requires EA Collector 30.100 or later.
+
+**Pending upstream fix:** The lm-logs subchart needs to support `userDefinedSecret`
+credential injection, matching the pattern used by argus and collectorset-controller.
