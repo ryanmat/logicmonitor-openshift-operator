@@ -184,6 +184,118 @@ CSC wildcard `"*"` verbs expanded to explicit verb lists (no wildcards in operat
 
 ---
 
+## Bug 4: lm-logs Subchart Incompatible with userDefinedSecret
+
+### Impact
+Enabling `lm-logs.enabled: true` when credentials are provided via `global.userDefinedSecret`
+causes the Helm release to fail. The operator enters a reconciliation error loop and the
+lm-logs DaemonSet never deploys. Existing components (argus, CSC, KSM) continue running
+but no new reconciliation changes are applied until lm-logs is disabled.
+
+### Root Cause
+The lm-logs subchart templates read credentials as plain Helm values (`lm_company_name`,
+`lm_access_id`, `lm_access_key`) directly in `configmap.yaml`. When credentials are
+provided via `userDefinedSecret`, these values are empty. The template contains a hard
+`fail` directive that aborts rendering when the secret lookup fails.
+
+The argus and CSC subcharts handle `userDefinedSecret` through post-install hooks that
+extract credentials from the secret at runtime and inject them as env vars. The lm-logs
+subchart does not participate in this mechanism.
+
+### Evidence
+```
+Failed to sync release: execution error at (lm-container/charts/lm-logs/templates/configmap.yaml:5:6):
+global.userDefinedSecret="lm-credentials" not found in namespace "logicmonitor"
+```
+Reproduced on ARO 4.20.15 with operator v0.3.1. The same chart works on AKS when using
+inline credentials (accessID/accessKey/account directly in Helm values).
+
+### Workaround
+None via the operator. Customers cannot enable lm-logs when using `userDefinedSecret`.
+The only workaround is to use inline credentials in the Helm values, which is not
+supported by the operator (it always uses `userDefinedSecret`).
+
+### Suggested Fix (Upstream)
+lm-logs templates should read credentials from the Kubernetes Secret referenced by
+`global.userDefinedSecret` using `secretKeyRef` in pod env vars, the same way argus
+and CSC do. Alternatively, the post-install hook should inject credentials into
+lm-logs components.
+
+### Affected Component
+- lm-logs v1.0.1 (subchart of lm-container v13.0.0)
+- `charts/lm-logs/templates/configmap.yaml`
+
+---
+
+## Bug 5: Argus Deployment Missing companyDomain Default with userDefinedSecret
+
+### Impact
+The argus Deployment pod (discovery agent) crashes on startup with a DNS resolution
+failure when using `userDefinedSecret` without a `companyDomain` key in the secret
+and without `global.companyDomain` set in the Helm values. The API URL resolves to
+`https://<account>.` instead of `https://<account>.logicmonitor.com`.
+
+The argus StatefulSet collector pods are unaffected because the post-install hook
+patches them with the correct `COMPANY_DOMAIN` env var.
+
+### Root Cause
+When credentials come from `userDefinedSecret`, the chart extracts the `account` field
+but does not default `companyDomain` to `logicmonitor.com`. The argus Deployment pod
+constructs the API URL by concatenating `account` + `.` + `companyDomain`, resulting
+in a trailing dot with no domain.
+
+The post-install hook handles this correctly for the StatefulSet pods (it checks for
+`companyDomain` in the secret and falls back to the Helm value or `logicmonitor.com`).
+But the Deployment pod is not patched by the hook.
+
+### Evidence
+```
+level=fatal msg="Failed to initialize argus: failed to build resource tree:
+Get \"https://lmryanmatuszewski./santaba/rest/device/groups/493\":
+dial tcp: lookup lmryanmatuszewski. on 172.30.0.10:53: no such host"
+```
+Reproduced on ARO 4.20.15 with operator v0.3.1. The AKS cluster does not hit this
+because it uses inline credentials where `companyDomain` defaults are applied at the
+Helm values level.
+
+### Workaround
+Set `global.companyDomain: "logicmonitor.com"` in the LMContainer CR spec, or add a
+`companyDomain` key to the credentials Secret.
+
+### Suggested Fix (Upstream)
+The chart should default `companyDomain` to `logicmonitor.com` in the argus Deployment
+template when the value is not provided. This default is already applied in the
+post-install hook logic but not in the Deployment template itself.
+
+### Affected Component
+- argus v15.0.1 (app v18.0.0)
+- `charts/argus/templates/deployment.yaml`
+
+---
+
+## userDefinedSecret Integration Gaps (Pattern)
+
+Bugs 4 and 5 share a common root cause: the `userDefinedSecret` feature is a bolt-on
+that only covers code paths explicitly handled by the post-install hooks. Components
+that read credentials or configuration directly from Helm values (not from env vars
+injected by hooks) break when `userDefinedSecret` is used.
+
+**Affected components:**
+- lm-logs: reads credentials as plain Helm values (Bug 4)
+- argus Deployment: missing companyDomain default (Bug 5)
+- lmotel: likely affected (untested, same credential pattern as lm-logs)
+
+**Unaffected components (hooks patch these):**
+- argus StatefulSet (collector pods)
+- collectorset-controller Deployment
+
+The `userDefinedSecret` mechanism was designed for argus and CSC. When lm-logs and
+lmotel were added as subcharts, the credential injection was not extended to cover
+them. Any new subchart added to lm-container will likely have the same gap unless
+it participates in the post-install hook credential injection.
+
+---
+
 ## Environment
 - OpenShift 4.20.15 (Azure Red Hat OpenShift)
 - lm-container chart v13.0.0
