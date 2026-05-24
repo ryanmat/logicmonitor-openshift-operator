@@ -2,6 +2,38 @@
 
 All notable changes to the LogicMonitor OpenShift Operator are documented here.
 
+## [0.3.3] - 2026-05-23
+
+### Changed
+- Vendored upstream `lm-container` Helm chart v13.1.0 (released 2026-04-23).
+  Replaces the v13.0.0 chart and the local workaround templates carried in
+  v0.3.1 and v0.3.2.
+- Subchart versions inherited from upstream v13.1.0:
+  - `argus` 15.0.1 -> 15.1.0 (app v18.0.0 -> v18.1.0)
+  - `collectorset-controller` 12.2.0 -> 12.3.0 (app v13.4.0 -> v13.5.0)
+  - `lm-logs` 1.0.1 -> 1.1.0
+  - `kube-state-metrics` 7.1.0 -> 7.2.2
+  - `lmutil` 0.1.10 -> 0.1.11
+  - `lmotel` 1.9.0 (unchanged)
+
+### Removed
+- Forked `charts/argus/templates/post-install.yaml` and
+  `charts/collectorset-controller/templates/post-install.yaml`. Upstream
+  v13.1.0 no longer ships these hooks; the work they did is now declarative
+  in the deployment templates (`secretKeyRef` env injection, correct replica
+  counts at install time).
+
+### Known Issues
+- Bug 2 (CollectorSet Controller does not auto-create collector group) is
+  not confirmed FIXED in CSC v13.5.0. The collector group auto-creation
+  workaround previously lived in the deleted `post-install.yaml`; if Bug 2
+  is still present in CSC v13.5.0, fresh installs will hang on a missing
+  collector group until the group is created manually. Validation on ARO is
+  pending OperatorHub merge.
+- See `docs/product-bugs-lm-container-v13.md` -- Bugs 1, 4, 5 are FIXED
+  upstream; Bug 2 status pending validation; Bug 3 is an operator-side
+  concern, not a chart issue.
+
 ## [0.3.2] - 2026-03-26
 
 ### Fixed

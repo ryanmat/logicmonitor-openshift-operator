@@ -1,21 +1,21 @@
 dependencies:
 - name: argus
   repository: https://logicmonitor.github.io/helm-charts
-  version: 15.0.1
+  version: 15.1.0
 - name: collectorset-controller
   repository: https://logicmonitor.github.io/helm-charts
-  version: 12.2.0
+  version: 12.3.0
 - name: lm-logs
   repository: https://logicmonitor.github.io/helm-charts
-  version: 1.0.1
+  version: 1.1.0
 - name: lmotel
   repository: https://logicmonitor.github.io/helm-charts
   version: 1.9.0
 - name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
-  version: 7.1.0
+  version: 7.2.2
 - name: lmutil
   repository: https://logicmonitor.github.io/helm-charts
-  version: 0.1.10
-digest: sha256:21c064ef42ed81c902408e0a2c4f70e1a0ca049051edf596437f6d308b5019d7
-generated: "2026-03-05T06:19:56.959554475Z"
+  version: 0.1.11
+digest: sha256:73d6baccd20e205e307c5c642c6a1b1de3e907605c3e3a924453d0a0d343ac55
+generated: "2026-04-23T14:45:46.897071368Z"

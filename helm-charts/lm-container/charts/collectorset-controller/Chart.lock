@@ -1,6 +1,6 @@
 dependencies:
 - name: lmutil
   repository: https://logicmonitor.github.io/helm-charts
-  version: 0.1.10
-digest: sha256:72e47ea4509a5d533ae97abdee0e946d3d722e6488d683fc76b5b6d49abf9c48
-generated: "2026-03-04T09:31:55.395579475Z"
+  version: 0.1.11
+digest: sha256:0beff82f3d8876d70278ada9537df2e90452b740948a16eb7bce621267bc4c2b
+generated: "2026-04-23T11:22:32.418782989Z"

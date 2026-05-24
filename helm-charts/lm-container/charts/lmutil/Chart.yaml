@@ -7,4 +7,4 @@ maintainers:
   name: LogicMonitor
 name: lmutil
 type: library
-version: 0.1.10
+version: 0.1.11
