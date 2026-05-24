@@ -6,10 +6,10 @@ A Kubernetes operator for deploying and managing LogicMonitor Container Monitori
 
 | Item | Status |
 |------|--------|
-| **OperatorHub** | Published (v0.3.2) — available in Community Operators catalog on OpenShift 4.12+ |
+| **OperatorHub** | Published (v0.3.2) — available in Community Operators catalog on OpenShift 4.12+; v0.3.3 submitted |
 | **ArtifactHub** | Pending registration |
-| **Current Version** | 0.3.2 |
-| **Helm Chart Version** | lm-container 13.0.0 |
+| **Current Version** | 0.3.3 |
+| **Helm Chart Version** | lm-container 13.1.0 |
 
 This is a community-maintained operator and is not officially supported by LogicMonitor. It is available in OperatorHub under the **Community Operators** catalog source on OpenShift 4.12+ clusters.
 
@@ -387,13 +387,13 @@ make run
 
 ```bash
 # Generate bundle
-make bundle VERSION=0.3.2
+make bundle VERSION=0.3.3
 
 # Build bundle image
-make bundle-build BUNDLE_IMG=your-registry/logicmonitor-operator-bundle:v0.3.2
+make bundle-build BUNDLE_IMG=your-registry/logicmonitor-operator-bundle:v0.3.3
 
 # Build catalog
-make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.3.2
+make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.3.3
 ```
 
 ## Project Structure
@@ -409,7 +409,7 @@ make catalog-build CATALOG_IMG=your-registry/logicmonitor-operator-catalog:v0.3.
 │   ├── rbac/                 # RBAC configuration
 │   └── samples/              # Example CRs
 ├── helm-charts/
-│   └── lm-container/         # Embedded Helm chart (v13.0.0)
+│   └── lm-container/         # Embedded Helm chart (v13.1.0)
 ├── scripts/                  # Utility scripts
 └── docs/                     # Documentation
 ```

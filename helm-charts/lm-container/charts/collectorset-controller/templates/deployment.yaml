@@ -81,7 +81,7 @@ spec:
             {{ toYaml . | nindent 12 }}
         {{- end}}
           env:
-        {{ include "lm-credentials-and-proxy-details" . | nindent 12 }}
+        {{ include "collectorset-controller.lm-credentials-and-proxy-details" . | nindent 12 }}
           volumeMounts:
             - name: etc-collectorset-controller
               mountPath: "/etc/collectorset-controller"

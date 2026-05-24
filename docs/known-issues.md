@@ -6,6 +6,32 @@ in the lm-container chart.
 
 For full technical details and evidence, see `docs/product-bugs-lm-container-v13.md`.
 
+## Status update -- v0.3.3 (lm-container 13.1.0)
+
+Operator v0.3.3 vendors the upstream lm-container Helm chart v13.1.0, which
+upstream-fixes most of the bugs documented below. Status by bug, pending
+ARO validation post-OperatorHub merge:
+
+- Bug 1 (post-install hook reconciliation loop): FIXED upstream. The hook
+  files no longer exist in lm-container 13.1.0. Replica counts are set
+  declaratively in the deployment templates.
+- Bug 2 (CSC collector group auto-create): UNCLEAR. CSC binary bumped from
+  v13.4.0 to v13.5.0; behavioral confirmation pending on ARO. If still
+  broken, fresh installs may hang on a missing collector group.
+- Bug 3 (operator RBAC delegation): NOT FIXED upstream and not a chart
+  issue. Our `config/rbac/role.yaml` covers the argus 15.1.0 and CSC 12.3.0
+  child ClusterRole permission surface.
+- Bug 4 (lm-logs incompatibility with userDefinedSecret): FIXED upstream
+  via `secretKeyRef` injection in lm-logs v1.1.0.
+- Bug 5 (argus Deployment missing companyDomain default): FIXED upstream.
+  `COMPANY_DOMAIN` defaults to `"logicmonitor.com"` in the argus deployment
+  template; users no longer need to set `global.companyDomain` explicitly
+  when using `userDefinedSecret`. The field remains supported for non-
+  default domains (e.g. `"lmgov.us"` for FedRAMP).
+
+Full validation report will be published as `docs/v13.1.0-validation.md`
+after ARO smoke-test post-OperatorHub merge.
+
 ## Post-Install Hook Compatibility
 
 The lm-container chart uses Helm post-install/post-upgrade hooks to configure deployments
